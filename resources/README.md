@@ -1,0 +1,1 @@
+Esta carpeta queda reservada para futuros recursos originales: audio, tipografías y gráficos. La versión 0.1 dibuja todos los gráficos mediante código y usa la tipografía integrada de Godot; no requiere descargas ni recursos comerciales.
