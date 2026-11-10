@@ -3,7 +3,7 @@ extends StaticBody2D
 const DISPLAY_NAME := "Marisol · estudiante guía"
 const DIALOGUE: Array[String] = [
 	"¡Bienvenido a Chapingo! Soy Marisol. Si es tu primer día, respira: todos nos perdimos por aquí alguna vez.",
-	"Al norte están las aulas y la biblioteca. Al oeste, el comedor. Dicen que la mejor brújula es seguir a quien lleva hambre.",
+	"Las aulas están al noreste: busca la entrada marcada bajo el edificio AULAS. El diario (J o su botón) te recuerda el camino. Al oeste, el comedor. La mejor brújula es seguir a quien lleva hambre.",
 	"Puedes recorrer esta pequeña plaza a tu ritmo. Los árboles dan sombra, pero todavía no te ayudan a estudiar. ¡Nos vemos por el campus!"
 ]
 

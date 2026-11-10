@@ -59,7 +59,7 @@ func button(text: String, action: Callable) -> Button:
 func show_menu() -> void:
 	clear()
 	label_text("CHAPINGO: VIDA UNIVERSITARIA", 28)
-	label_text("V0.2.1 · Tu historia comienza en el campus")
+	label_text("V0.3 · Tu historia comienza en el campus")
 	button("Nueva partida", show_creator)
 	button("Continuar", continue_game).disabled = Session.read_save().is_empty()
 	button("Salir", func(): get_tree().quit())

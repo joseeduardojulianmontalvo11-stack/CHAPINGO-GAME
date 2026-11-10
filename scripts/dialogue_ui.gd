@@ -13,7 +13,7 @@ var header: Label
 func _ready() -> void:
 	header = Label.new()
 	header.position = Vector2(24, 18)
-	header.text = "CHAPINGO: VIDA UNIVERSITARIA  ·  V0.2.1\nWASD / Flechas: caminar    E: interactuar    Esc: cerrar    Ctrl + Shift + M: prueba táctil"
+	header.text = "CHAPINGO: VIDA UNIVERSITARIA  ·  V0.3\nWASD / Flechas: caminar    E: interactuar    J: diario    Esc: cerrar    Ctrl + Shift + M: prueba táctil"
 	header.add_theme_font_size_override("font_size", 15)
 	header.add_theme_color_override("font_shadow_color", Color("24382b"))
 	header.add_theme_constant_override("shadow_offset_x", 2)

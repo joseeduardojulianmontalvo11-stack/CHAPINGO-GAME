@@ -1,4 +1,18 @@
-# CHAPINGO: VIDA UNIVERSITARIA — V0.2.1
+# CHAPINGO: VIDA UNIVERSITARIA — V0.3
+
+## Primeras misiones
+
+La exploración sigue siendo libre. Hablar con Marisol activa **¿Dónde está mi salón?** una sola vez. Busca la entrada marcada bajo AULAS, al noreste; entrar en la zona completa la misión y muestra una bienvenida. No necesitas interactuar con una puerta ni entrar al edificio.
+
+Para **El primer desayuno**, consulta con E o Acción el **Aviso** del comedor (izquierda de su entrada); luego consulta el **Menú** a su derecha. Es opcional y puede estar activa junto con la principal. No hay inventario, economía ni alimentación.
+
+**J** o el botón **Diario (J)** abre y cierra el diario. El botón Cerrar del diario también permite usarlo con tacto. Agrupa principales activas, secundarias activas y completadas con sus objetivos y consecuencias. Se puede desplazar; al cerrarlo vuelve el movimiento.
+
+El progreso de misiones se guarda al actualizarse y con los controles de guardado existentes. Los guardados V0.2/V0.2.1 sin el campo opcional `quests` se leen como partidas sin misiones iniciadas, sin reescribir el archivo durante la lectura. Mantienen personaje, vivienda y posición. Guarda antes de cerrar para conservar la última posición.
+
+Arquitectura: `scripts/quests.gd` define misiones, estados, objetivos con identificadores estables y eventos; `scripts/campus_story.gd` conecta interacciones y zonas del mapa; `scripts/quest_journal.gd` presenta el diario. Las futuras misiones pueden usar nuevos datos y eventos, incluyendo varios objetivos ordenados.
+
+Prueba adicional: `godot --headless --path . --script tests/quests.gd`. Usa `prueba-quests.json`, separado del guardado del jugador. Las validaciones automatizadas no sustituyen pruebas visuales o físicas en Windows/Android/iOS.
 
 ## Preparación para teléfonos
 
@@ -71,4 +85,4 @@ La prueba verifica carga, movimiento, colisiones, proximidad, conversación y re
 
 ## Alcance
 
-Los gráficos se dibujan con primitivas originales y la fuente integrada del motor. No hay audio, horarios, calificaciones ni misiones todavía. Los recursos son deliberadamente provisionales. La revisión visual manual en Windows sigue pendiente.
+Los gráficos se dibujan con primitivas originales y la fuente integrada del motor. No hay audio, horarios ni calificaciones todavía. Los recursos son deliberadamente provisionales. La revisión visual manual en Windows sigue pendiente.

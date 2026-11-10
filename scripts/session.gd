@@ -5,8 +5,10 @@ var profile: Dictionary = {}
 var location := "campus"
 var saved_position := Vector2(820, 600)
 var save_path := SAVE_PATH
+var quests = preload("res://scripts/quests.gd").new()
 
 func new_game(data: Dictionary) -> void:
+	quests.reset()
 	profile = data.duplicate(true)
 	location = profile["housing"]
 	saved_position = Vector2(560, 450)
@@ -15,7 +17,7 @@ func save_game() -> bool:
 	var file := FileAccess.open(save_path, FileAccess.WRITE)
 	if file == null:
 		return false
-	file.store_string(JSON.stringify({"version": 1, "profile": profile, "location": location, "position": [saved_position.x, saved_position.y]}))
+	file.store_string(JSON.stringify({"version": 1, "profile": profile, "location": location, "position": [saved_position.x, saved_position.y], "quests": quests.progress}))
 	return true
 
 func read_save() -> Dictionary:
@@ -47,4 +49,5 @@ func load_game() -> bool:
 	profile = data["profile"]
 	location = data["location"]
 	saved_position = Vector2(data["position"][0], data["position"][1])
+	quests.restore(data.get("quests", {}) if data.get("quests", {}) is Dictionary else {})
 	return true
