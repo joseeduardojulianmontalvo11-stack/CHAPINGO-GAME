@@ -12,14 +12,14 @@ var is_open := false
 func _ready() -> void:
 	var header := Label.new()
 	header.position = Vector2(24, 18)
-	header.text = "CHAPINGO: VIDA UNIVERSITARIA  ·  V0.1\nWASD / Flechas: caminar    E: conversar / continuar    Esc: cerrar diálogo"
-	header.add_theme_font_size_override("font_size", 20)
+	header.text = "CHAPINGO: VIDA UNIVERSITARIA  ·  V0.2\nWASD / Flechas: caminar    E: interactuar    Esc: cerrar diálogo"
+	header.add_theme_font_size_override("font_size", 15)
 	header.add_theme_color_override("font_shadow_color", Color("24382b"))
 	header.add_theme_constant_override("shadow_offset_x", 2)
 	header.add_theme_constant_override("shadow_offset_y", 2)
 	add_child(header)
 	prompt = Label.new()
-	prompt.position = Vector2(24, 100)
+	prompt.position = Vector2(24, 115)
 	prompt.add_theme_font_size_override("font_size", 22)
 	add_child(prompt)
 	panel = PanelContainer.new()

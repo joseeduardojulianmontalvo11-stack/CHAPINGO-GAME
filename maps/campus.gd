@@ -64,3 +64,5 @@ func _draw() -> void:
 		draw_rect(Rect2(point - Vector2(8, 35), Vector2(16, 40)), Color("765238"))
 		draw_circle(point + Vector2(0, -48), 42, Color("315c3c"))
 		draw_circle(point + Vector2(-12, -60), 28, Color("47774a"))
+	draw_rect(Rect2(540, 570, 80, 60), Color("80623f"))
+	draw_string(ThemeDB.fallback_font, Vector2(520, 555), "Tu vivienda · E", HORIZONTAL_ALIGNMENT_LEFT, -1, 18)

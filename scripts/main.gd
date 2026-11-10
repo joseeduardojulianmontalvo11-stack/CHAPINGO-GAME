@@ -8,10 +8,12 @@ const INTERACTION_DISTANCE := 90.0
 var student: CharacterBody2D
 var guide: StaticBody2D
 var ui: CanvasLayer
+var map: Node2D
+var current_location := "campus"
+var door := Vector2(580, 600)
 
 func _ready() -> void:
 	configure_input()
-	add_child(CampusMap.new())
 	var people := Node2D.new()
 	people.y_sort_enabled = true
 	add_child(people)
@@ -24,6 +26,67 @@ func _ready() -> void:
 	ui = DialogueUI.new()
 	add_child(ui)
 	ui.closed.connect(func(): student.controls_enabled = true)
+	if not Session.profile.is_empty():
+		student.apply_profile(Session.profile)
+		set_location(Session.location, Session.saved_position)
+	else:
+		set_location("campus", Vector2(820, 600))
+	var save_button := Button.new()
+	save_button.text = "Guardar"
+	save_button.position = Vector2(24, 75)
+	save_button.pressed.connect(func(): save_button.text = "Guardado" if save_current() else "Error al guardar")
+	ui.add_child(save_button)
+	var menu_button := Button.new()
+	menu_button.text = "Guardar y menú"
+	menu_button.position = Vector2(140, 75)
+	menu_button.pressed.connect(func():
+		if save_current():
+			get_tree().change_scene_to_file("res://scenes/menu.tscn")
+		else:
+			menu_button.text = "Error al guardar")
+	ui.add_child(menu_button)
+	var identity := Label.new()
+	identity.position = Vector2(330, 80)
+	identity.text = Session.profile.get("name", "Estudiante")
+	ui.add_child(identity)
+
+func set_location(value: String, point: Vector2) -> void:
+	if is_instance_valid(map):
+		remove_child(map)
+		map.queue_free()
+	current_location = value
+	if value == "campus":
+		map = CampusMap.new()
+	else:
+		map = preload("res://maps/room.gd").new()
+		map.housing = value
+	add_child(map)
+	move_child(map, 0)
+	guide.visible = value == "campus"
+	guide.get_node("Colision").set_deferred("disabled", value != "campus")
+	student.position = point
+	var camera: Camera2D = student.get_node("Camara")
+	camera.limit_right = 1800 if value == "campus" else 1152
+	camera.limit_bottom = 1200 if value == "campus" else 720
+	camera.reset_smoothing()
+	if not Session.profile.is_empty():
+		save_current()
+
+func save_current() -> bool:
+	if Session.profile.is_empty():
+		return false
+	Session.location = current_location
+	Session.saved_position = student.position
+	return Session.save_game()
+
+func near_door() -> bool:
+	return student.position.distance_to(door) < 75
+
+func travel() -> void:
+	if current_location == "campus":
+		set_location(Session.profile.get("housing", "internado"), Vector2(570, 500))
+	else:
+		set_location("campus", Vector2(580, 655))
 
 func configure_input() -> void:
 	var bindings := {"move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT], "move_up": [KEY_W, KEY_UP], "move_down": [KEY_S, KEY_DOWN], "interact": [KEY_E], "close_dialogue": [KEY_ESCAPE]}
@@ -37,14 +100,18 @@ func configure_input() -> void:
 
 func _process(_delta: float) -> void:
 	ui.prompt.text = "[E] Hablar con Marisol" if can_interact() and not ui.is_open else ""
+	if near_door() and not ui.is_open:
+		ui.prompt.text = "[E] Volver a tu vivienda" if current_location == "campus" else "[E] Salir al campus"
 
 func can_interact() -> bool:
-	return student.position.distance_to(guide.position) <= INTERACTION_DISTANCE
+	return current_location == "campus" and student.position.distance_to(guide.position) <= INTERACTION_DISTANCE
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("interact") and not event.is_echo():
 		if ui.is_open:
 			ui.advance()
+		elif near_door():
+			travel()
 		elif can_interact():
 			student.controls_enabled = false
 			ui.open_dialogue(guide.DISPLAY_NAME, guide.DIALOGUE)

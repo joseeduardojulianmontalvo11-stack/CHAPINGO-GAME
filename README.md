@@ -1,4 +1,18 @@
-# CHAPINGO: VIDA UNIVERSITARIA — V0.1
+# CHAPINGO: VIDA UNIVERSITARIA — V0.2
+
+## Nueva partida y guardado
+
+F5 abre el menú principal. **Nueva partida** permite elegir nombre (vacío usa «Estudiante»), tres camisas, cuatro colores de cabello, cuatro tonos de piel y vivienda, con vista previa. Comenzar reemplaza el guardado anterior.
+
+Cada vivienda tiene un interior propio con cama, escritorio y colisiones. Acércate a la puerta amarilla y pulsa **E** para salir. En el campus, el letrero «Tu vivienda · E» al oeste de Marisol permite regresar a la vivienda elegida.
+
+**Guardar** conserva nombre, apariencia, vivienda, ubicación y posición. **Guardar y menú** permite volver al menú; **Continuar** recupera una partida válida. También se guarda al comenzar y cambiar de ubicación. Cerrar la ventana sin guardar pierde el movimiento posterior al último guardado.
+
+El archivo es `user://partida.json`; en Windows está en `%APPDATA%/Godot/app_userdata/CHAPINGO- VIDA UNIVERSITARIA/`. No se incorpora a Git. Solo hay una ranura de guardado; una partida inválida deshabilita Continuar.
+
+Nuevos componentes: `scenes/menu.tscn`, `scripts/menu.gd` (menú y creador), `scripts/session.gd` (autoload de datos y persistencia), `maps/room.gd` (interior reutilizable), `tests/v02.gd` (creación, viviendas, transiciones y guardado). El campus sigue en `scenes/main.tscn`.
+
+Ejecuta también `godot --headless --path . --script tests/v02.gd`. Esta prueba usa `prueba-v02.json`, separado de la partida del jugador.
 
 Primera base jugable de un simulador universitario 2D inspirado en Chapingo, México. Mapa provisional original, sin pretensión de representar fielmente el campus real.
 
@@ -45,4 +59,4 @@ La prueba verifica carga, movimiento, colisiones, proximidad, conversación y re
 
 ## Alcance
 
-Los gráficos se dibujan con primitivas originales y la fuente integrada del motor. No hay creación de personaje, interiores, audio, guardado, horarios, calificaciones ni misiones todavía. No hay errores funcionales conocidos tras las comprobaciones automatizadas; los recursos son deliberadamente provisionales.
+Los gráficos se dibujan con primitivas originales y la fuente integrada del motor. No hay audio, horarios, calificaciones ni misiones todavía. Los recursos son deliberadamente provisionales. La revisión visual manual en Windows sigue pendiente.

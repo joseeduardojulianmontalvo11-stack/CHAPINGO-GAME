@@ -2,8 +2,11 @@ config_version=5
 
 [application]
 config/name="CHAPINGO: VIDA UNIVERSITARIA"
-run/main_scene="res://scenes/main.tscn"
+run/main_scene="res://scenes/menu.tscn"
 config/features=PackedStringArray("4.0", "GL Compatibility")
+
+[autoload]
+Session="*res://scripts/session.gd"
 
 [display]
 window/size/viewport_width=1152
