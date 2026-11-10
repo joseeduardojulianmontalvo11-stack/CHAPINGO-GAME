@@ -8,11 +8,12 @@ var prompt: Label
 var pages: Array[String] = []
 var page := 0
 var is_open := false
+var header: Label
 
 func _ready() -> void:
-	var header := Label.new()
+	header = Label.new()
 	header.position = Vector2(24, 18)
-	header.text = "CHAPINGO: VIDA UNIVERSITARIA  ·  V0.2\nWASD / Flechas: caminar    E: interactuar    Esc: cerrar diálogo"
+	header.text = "CHAPINGO: VIDA UNIVERSITARIA  ·  V0.2.1\nWASD / Flechas: caminar    E: interactuar    Esc: cerrar    F8: prueba táctil"
 	header.add_theme_font_size_override("font_size", 15)
 	header.add_theme_color_override("font_shadow_color", Color("24382b"))
 	header.add_theme_constant_override("shadow_offset_x", 2)
@@ -47,9 +48,11 @@ func _ready() -> void:
 	_resize()
 
 func _resize() -> void:
-	var size := get_viewport().get_visible_rect().size
-	panel.position = Vector2(24, size.y - 235)
-	panel.size = Vector2(size.x - 48, 210)
+	var safe := preload("res://scripts/safe_layout.gd").rect(get_viewport())
+	header.position = safe.position
+	prompt.position = safe.position + Vector2(0, 115)
+	panel.position = Vector2(safe.position.x, safe.end.y - 470)
+	panel.size = Vector2(safe.size.x, 225)
 
 func open_dialogue(character_name: String, lines: Array[String]) -> void:
 	pages = lines

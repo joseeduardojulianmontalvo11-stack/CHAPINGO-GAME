@@ -11,6 +11,7 @@ var ui: CanvasLayer
 var map: Node2D
 var current_location := "campus"
 var door := Vector2(580, 600)
+var touch: Control
 
 func _ready() -> void:
 	configure_input()
@@ -49,6 +50,17 @@ func _ready() -> void:
 	identity.position = Vector2(330, 80)
 	identity.text = Session.profile.get("name", "Estudiante")
 	ui.add_child(identity)
+	for control in [save_button, menu_button]:
+		control.custom_minimum_size = Vector2(110, 52)
+	touch = preload("res://scripts/touch_controls.gd").new()
+	ui.add_child(touch)
+	var layout := func():
+		var safe := preload("res://scripts/safe_layout.gd").rect(get_viewport())
+		save_button.position = safe.position + Vector2(0, 54)
+		menu_button.position = safe.position + Vector2(125, 54)
+		identity.position = safe.position + Vector2(340, 70)
+	get_viewport().size_changed.connect(layout)
+	layout.call()
 
 func set_location(value: String, point: Vector2) -> void:
 	if is_instance_valid(map):

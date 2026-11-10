@@ -15,13 +15,24 @@ func _ready() -> void:
 	background.color = Color("203f35")
 	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(background)
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	add_child(scroll)
 	var center := CenterContainer.new()
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(center)
+	center.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(center)
 	column = VBoxContainer.new()
 	column.custom_minimum_size.x = 560
 	column.add_theme_constant_override("separation", 12)
 	center.add_child(column)
+	var layout := func():
+		var safe := preload("res://scripts/safe_layout.gd").rect(get_viewport())
+		scroll.position = safe.position
+		scroll.size = safe.size
+		center.custom_minimum_size.y = safe.size.y
+		column.custom_minimum_size.x = minf(640, safe.size.x)
+	get_viewport().size_changed.connect(layout)
+	layout.call()
 	show_menu()
 
 func clear() -> void:
@@ -32,6 +43,7 @@ func clear() -> void:
 func label_text(value: String, font_size := 20) -> void:
 	var label := Label.new()
 	label.text = value
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.add_theme_font_size_override("font_size", font_size)
 	column.add_child(label)
@@ -39,7 +51,7 @@ func label_text(value: String, font_size := 20) -> void:
 func button(text: String, action: Callable) -> Button:
 	var control := Button.new()
 	control.text = text
-	control.custom_minimum_size.y = 42
+	control.custom_minimum_size.y = 52
 	control.pressed.connect(action)
 	column.add_child(control)
 	return control
@@ -47,7 +59,7 @@ func button(text: String, action: Callable) -> Button:
 func show_menu() -> void:
 	clear()
 	label_text("CHAPINGO: VIDA UNIVERSITARIA", 28)
-	label_text("V0.2 · Tu historia comienza en el campus")
+	label_text("V0.2.1 · Tu historia comienza en el campus")
 	button("Nueva partida", show_creator)
 	button("Continuar", continue_game).disabled = Session.read_save().is_empty()
 	button("Salir", func(): get_tree().quit())
@@ -56,6 +68,9 @@ func show_menu() -> void:
 func choice(title: String, values: Array) -> OptionButton:
 	label_text(title, 16)
 	var control := OptionButton.new()
+	control.custom_minimum_size.y = 48
+	control.fit_to_longest_item = false
+	control.get_popup().add_theme_constant_override("v_separation", 22)
 	for value in values:
 		control.add_item(value)
 	column.add_child(control)
@@ -68,6 +83,7 @@ func show_creator() -> void:
 	name_field = LineEdit.new()
 	name_field.placeholder_text = "Nombre del estudiante"
 	name_field.max_length = 32
+	name_field.custom_minimum_size.y = 48
 	column.add_child(name_field)
 	look = choice("Apariencia", ["Camisa crema", "Camisa azul", "Camisa terracota"])
 	hair = choice("Cabello", ["Oscuro", "Castaño", "Rubio", "Violeta"])
@@ -80,6 +96,7 @@ func show_creator() -> void:
 	preview.get_node("Camara").enabled = false
 	preview.set_physics_process(false)
 	preview.position = Vector2(280, 78)
+	holder.resized.connect(func(): preview.position.x = holder.size.x / 2 if is_instance_valid(preview) else 0)
 	preview.scale = Vector2(1.5, 1.5)
 	holder.add_child(preview)
 	update_preview()

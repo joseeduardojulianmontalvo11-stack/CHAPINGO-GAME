@@ -1,4 +1,16 @@
-# CHAPINGO: VIDA UNIVERSITARIA — V0.2
+# CHAPINGO: VIDA UNIVERSITARIA — V0.2.1
+
+## Preparación para teléfonos
+
+Un solo proyecto GDScript con renderizador Compatibility. Orientación horizontal, lienzo expandible, márgenes que consultan el área segura del dispositivo, creador desplazable y botones de al menos 48 unidades. El diálogo queda por encima de los controles inferiores.
+
+En móviles se muestran automáticamente un joystick izquierdo y los botones **Acción** (interactuar o avanzar diálogo) y **Cerrar**. Guardar y Guardar y menú siguen accesibles en la parte superior. Los menús utilizan la entrada táctil estándar de Godot. Cada dedo tiene seguimiento independiente: se puede mantener el joystick y pulsar Acción con otro dedo. Perder el foco o cambiar el tamaño libera el joystick.
+
+En Windows pulsa **F8** durante la partida para mostrar u ocultar los controles y arrastra el joystick con el mouse. También puedes ejecutar `godot --path . -- --touch-test`. El mouse simula un dedo; la simultaneidad de dedos se verifica mediante eventos sintéticos en `tests/mobile.gd`. WASD, flechas, E y Esc siguen disponibles.
+
+Prueba automatizada adicional: `godot --headless --path . --script tests/mobile.gd`. Las pruebas usan archivos separados de la partida real.
+
+No se ha validado en dispositivos Android o iOS. Quedan pendientes pruebas físicas de multitáctil, teclado virtual, áreas seguras y legibilidad, así como rendimiento y ciclo de suspensión en ambos sistemas. Para exportar harán falta las plantillas de Godot, un preset y SDK/JDK para Android; para iOS, macOS con Xcode, preset, firma y aprovisionamiento de Apple. No se han generado APK ni aplicaciones iOS. La orientación vertical no es el objetivo de esta versión.
 
 ## Nueva partida y guardado
 
