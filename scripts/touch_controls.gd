@@ -26,7 +26,7 @@ func reflow() -> void:
 	queue_redraw()
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_F8:
+	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_M and event.ctrl_pressed and event.shift_pressed and not event.alt_pressed and not event.meta_pressed:
 		test_mode = not test_mode
 		visible = OS.has_feature("mobile") or test_mode
 		release_all()

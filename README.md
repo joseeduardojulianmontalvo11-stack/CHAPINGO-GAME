@@ -6,7 +6,7 @@ Un solo proyecto GDScript con renderizador Compatibility. Orientación horizonta
 
 En móviles se muestran automáticamente un joystick izquierdo y los botones **Acción** (interactuar o avanzar diálogo) y **Cerrar**. Guardar y Guardar y menú siguen accesibles en la parte superior. Los menús utilizan la entrada táctil estándar de Godot. Cada dedo tiene seguimiento independiente: se puede mantener el joystick y pulsar Acción con otro dedo. Perder el foco o cambiar el tamaño libera el joystick.
 
-En Windows pulsa **F8** durante la partida para mostrar u ocultar los controles y arrastra el joystick con el mouse. También puedes ejecutar `godot --path . -- --touch-test`. El mouse simula un dedo; la simultaneidad de dedos se verifica mediante eventos sintéticos en `tests/mobile.gd`. WASD, flechas, E y Esc siguen disponibles.
+En Windows pulsa **Ctrl + Shift + M** durante la partida para mostrar u ocultar los controles y arrastra el joystick con el mouse. También puedes ejecutar `godot --path . -- --touch-test`. El mouse simula un dedo; la simultaneidad de dedos se verifica mediante eventos sintéticos en `tests/mobile.gd`. WASD, flechas, E y Esc siguen disponibles.
 
 Prueba automatizada adicional: `godot --headless --path . --script tests/mobile.gd`. Las pruebas usan archivos separados de la partida real.
 

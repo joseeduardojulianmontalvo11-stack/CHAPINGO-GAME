@@ -26,10 +26,23 @@ func run() -> void:
 	var touch = world.touch
 	check(not touch.visible, "Controles ocultos en computadora")
 	var toggle := InputEventKey.new()
-	toggle.physical_keycode = KEY_F8
+	toggle.physical_keycode = KEY_M
 	toggle.pressed = true
 	touch._input(toggle)
-	check(touch.visible, "F8 activa simulación")
+	check(not touch.visible, "M sin modificadores no activa simulación")
+	toggle.ctrl_pressed = true
+	touch._input(toggle)
+	check(not touch.visible, "Ctrl + M no activa simulación")
+	toggle.shift_pressed = true
+	touch._input(toggle)
+	check(touch.visible, "Ctrl + Shift + M activa simulación")
+	toggle.echo = true
+	touch._input(toggle)
+	check(touch.visible, "La repetición de tecla no alterna los controles")
+	toggle.echo = false
+	touch._input(toggle)
+	check(not touch.visible, "Ctrl + Shift + M desactiva simulación")
+	touch._input(toggle)
 	var mouse := InputEventMouseButton.new()
 	mouse.button_index = MOUSE_BUTTON_LEFT
 	mouse.position = touch.stick_center + Vector2(65, 0)
