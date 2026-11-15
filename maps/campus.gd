@@ -70,6 +70,9 @@ func is_walkable(point: Vector2, margin := 14.0) -> bool:
 	for tree in TREES:
 		if point.distance_to(tree) < 18.0 + margin:
 			return false
+	for lamp in LAMPS:
+		if point.distance_to(lamp) < 7.0 + margin:
+			return false
 	return true
 
 func add_obstacle(rect: Rect2, prefix := "Obstaculo") -> void:

@@ -26,8 +26,8 @@ func _ready() -> void:
 
 func reflow() -> void:
 	var safe := preload("res://scripts/safe_layout.gd").rect(get_viewport())
-	position = safe.position + Vector2(0, 115)
-	size = Vector2(safe.size.x, safe.size.y - 115)
+	position = safe.position + Vector2(0, 60)
+	size = Vector2(safe.size.x, safe.size.y - 60)
 
 func refresh() -> void:
 	text.text = "Explora a tu ritmo. Habla con Marisol o visita el comedor.\n"

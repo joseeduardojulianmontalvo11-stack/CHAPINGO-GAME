@@ -1,74 +1,93 @@
-# CHAPINGO: VIDA UNIVERSITARIA — V0.4
+# CHAPINGO: VIDA UNIVERSITARIA — V0.5
 
-Simulador universitario 2D de vista superior inspirado en la Universidad Autónoma Chapingo. El campus es una representación original construida con primitivas de Godot; no utiliza el mapa institucional como fondo ni intenta reproducirlo a escala.
+Simulador universitario 2D de vista superior inspirado en la Universidad Autónoma Chapingo. El campus es una representación original construida con primitivas de Godot; no utiliza el mapa institucional como fondo ni presenta horarios oficiales de la universidad.
 
-## Campus V0.4
+## Primera jornada académica
 
-El exterior creció de 1800×1200 a 3200×2200. Una red de caminos conecta la zona central y el Patio de Honor con:
+V0.5 incorpora una base académica jugable sin limitar la exploración libre:
 
-- Rectoría.
-- Biblioteca Central.
-- Comedor Central.
-- Auditorio Álvaro Carrillo.
-- Preparatoria Agrícola y su acceso a aulas.
-- Dormitorios.
-- La Meche.
-- Jardines y áreas deportivas.
+- Reloj interno con hora, día y día de la semana.
+- Escala predeterminada de 0.5 minutos del juego por segundo real: una jornada de 12 horas dura aproximadamente 24 minutos.
+- Botánica, Matemáticas e Introducción a los Suelos, cada una con identificador, profesor, ubicación y sesiones semanales ficticias.
+- Ventanas amplias para llegar a clase, con registro separado de asistencia puntual, llegada tarde y falta.
+- Prevención de asistencia duplicada por sesión.
+- Actividad reutilizable de tres preguntas por materia y calificación de 0 a 10.
+- Una actividad ya evaluada no puede repetirse para generar calificaciones ilimitadas.
+- Panel académico con resumen, próxima clase, horario e historial de asistencias y calificaciones.
+- Descanso en la vivienda para avanzar al siguiente día a las 08:00.
 
-Los edificios tienen paletas y fachadas diferenciadas, techos con aleros, puertas, ventanas, letreros y detalles propios. El campus incorpora árboles de copa variable, jardines con flores, bancas, luminarias, señalización, canchas y caminos texturizados. Edificios, troncos, bancas, luminarias y límites comparten geometría coherente con sus colisiones.
+El reloj se pausa durante diálogos, diario, ayuda, panel académico y actividades de lectura. Los cinco estudiantes ambientales continúan recorriendo sus rutas normalmente mientras el reloj avanza.
 
-Cinco estudiantes secundarios recorren rutas cortas con apariencias variadas. Son elementos ambientales sin cuerpo de colisión para no bloquear al protagonista ni interferir con las misiones.
+Para asistir, consulta **Académico (H)**, dirígete a la entrada existente de AULAS durante una sesión y pulsa **E** o **Acción**. Faltar o llegar tarde sólo se registra: nunca bloquea el campus ni termina la partida.
 
-La cámara, el punto inicial, Marisol, el acceso a vivienda y las zonas de aulas/comedor se actualizaron para el mapa ampliado. Los interiores y las partidas V0.3 siguen usando el mismo formato de guardado.
+## Interfaz V0.5
 
-## Funciones conservadas
+La barra superior reúne en una sola fila:
 
-- Creador de personaje con nombre, apariencia, cabello y tono de piel.
-- Elección entre internado y vivienda externa, con interiores separados.
-- Movimiento con velocidad diagonal normalizada y cámara limitada al mapa.
-- NPC Marisol y diálogo en español.
-- Misión principal **¿Dónde está mi salón?**.
-- Misión secundaria **El primer desayuno**.
-- Diario de misiones con estados, objetivos y consecuencias.
-- Guardado/carga de perfil, vivienda, ubicación, posición y misiones.
-- Joystick y controles táctiles; simulación en escritorio con **Ctrl + Shift + M**.
+- Guardar.
+- Guardar y menú.
+- Nombre del jugador.
+- Día y hora.
+- Académico (H).
+- Diario (J).
+- Ayuda.
 
-Hablar con Marisol inicia la misión principal. Cruza el Patio de Honor hacia Preparatoria Agrícola y entra en la zona marcada bajo AULAS. Para la misión del comedor, consulta primero el Aviso y después el Menú junto al acceso del Comedor Central. **J** o **Diario (J)** abre el diario.
+Las instrucciones permanentes se sustituyeron por un panel **Ayuda** accesible. La versión se define una sola vez en `scripts/app_info.gd` y se reutiliza en menú e interfaz. Los botones principales mantienen al menos 48 unidades de alto y toda la interfaz consulta el área segura.
+
+El joystick y los botones **Acción** y **Cerrar** se conservan. En escritorio, **Ctrl + Shift + M** muestra u oculta la simulación táctil.
+
+## Campus y funciones conservadas
+
+El campus V0.4 mantiene sus dimensiones de 3200×2200, coordenadas, colisiones, caminos y edificios: Rectoría, Biblioteca Central, Comedor Central, Patio de Honor, Auditorio Álvaro Carrillo, Preparatoria Agrícola, dormitorios, La Meche, jardines y áreas deportivas.
+
+También se conservan:
+
+- Creador de personaje y elección de vivienda.
+- Interiores del internado y vivienda externa.
+- Movimiento, cámara y cinco estudiantes ambientales.
+- Marisol y sus diálogos.
+- Misiones **¿Dónde está mi salón?** y **El primer desayuno**.
+- Diario de misiones.
+- Guardado y carga.
+- Controles WASD, flechas, teclado, mouse y tacto.
 
 ## Controles
 
 - **WASD o flechas:** caminar.
-- **E:** interactuar, conversar o avanzar diálogo.
-- **Esc:** cerrar diálogo.
-- **J:** abrir/cerrar el diario.
-- **Ctrl + Shift + M:** mostrar u ocultar la simulación de controles táctiles.
+- **E:** interactuar, asistir a clase o avanzar diálogo.
+- **Esc:** cerrar diálogo o panel modal.
+- **J:** abrir/cerrar diario de misiones.
+- **H:** abrir/cerrar panel académico.
+- **Ctrl + Shift + M:** simular controles táctiles en escritorio.
 
-En móviles se muestran automáticamente un joystick izquierdo y los botones **Acción** y **Cerrar**. Cada dedo se procesa de forma independiente y perder el foco libera el joystick. Los márgenes se adaptan al área segura y los blancos táctiles principales miden al menos 48 unidades.
+## Guardado y compatibilidad
+
+El archivo `user://partida.json` conserva perfil, vivienda, ubicación, posición, misiones, día, hora, asistencias, actividades y calificaciones. El formato sigue aceptando partidas de V0.2, V0.2.1, V0.3 y V0.4: si faltan campos académicos, se inicializan sin borrar los sistemas anteriores.
+
+Al cargar una posición antigua del campus se comprueba que sea transitable. Si quedó dentro de un edificio, árbol, banca, luminaria o límite tras la ampliación V0.4, el estudiante reaparece en un punto central seguro sin perder progreso.
+
+En Windows, el guardado normal corresponde a `%APPDATA%/Godot/app_userdata/CHAPINGO- VIDA UNIVERSITARIA/`.
 
 ## Arquitectura
 
-- `maps/campus.gd`: datos, distribución, caminos, mobiliario y comprobaciones transitables del campus.
-- `scripts/campus_building.gd`: componente reutilizable de edificio; dibujo y colisión parten de la misma huella.
-- `scripts/campus_tree.gd`: árbol reutilizable con copa variable y colisión en el tronco.
-- `scripts/ambient_student.gd`: apariencia y rutas de estudiantes secundarios sin bloqueo.
-- `scripts/main.gd`: ciclo del mundo, ubicaciones, cámara, personas e interacción.
-- `scripts/campus_story.gd`: zonas e interacciones de las misiones del exterior.
-- `scripts/quests.gd` y `scripts/quest_journal.gd`: datos, progreso y diario de misiones.
-- `maps/room.gd`: interior reutilizable para internado y vivienda externa.
-- `scripts/session.gd`: perfil y persistencia.
-- `scripts/touch_controls.gd`: joystick, botones táctiles y simulación en escritorio.
+- `scripts/app_info.gd`: nombre y versión centralizados.
+- `scripts/academic_clock.gd`: reloj, calendario, escala y avance de día.
+- `scripts/academic_schedule.gd`: materias, profesores, sesiones y preguntas.
+- `scripts/academics.gd`: asistencias, faltas, actividades, calificaciones y persistencia.
+- `scripts/academic_manager.gd`: integración del sistema académico con el mundo.
+- `scripts/academic_ui.gd`: resumen, horario, actividad e historial.
+- `scripts/game_hud.gd`: barra superior y ayuda accesible.
+- `scripts/session.gd`: perfil, misiones, datos académicos y compatibilidad de guardado.
+- `maps/campus.gd`: campus V0.4 y validación de posiciones transitables.
+- `scripts/campus_story.gd`: Marisol, comedor, aulas y diario de misiones.
 
-El proyecto conserva GDScript y el renderizador **GL Compatibility**, con orientación horizontal y sin dependencias externas.
+Los edificios, árboles y estudiantes ambientales siguen encapsulados en componentes reutilizables. El proyecto conserva GDScript, orientación horizontal y el renderizador **GL Compatibility**.
 
 ## Abrir y ejecutar
 
-Instala Godot 4.x estándar (no .NET), importa `project.godot` y pulsa **F5**. Validado automáticamente con Godot 4.6.3. No se requieren paquetes, servicios, claves ni recursos externos.
-
-El guardado normal está en `user://partida.json`; en Windows corresponde a `%APPDATA%/Godot/app_userdata/CHAPINGO- VIDA UNIVERSITARIA/`. Hay una ranura. **Guardar** conserva el estado actual y **Guardar y menú** vuelve al menú principal.
+Instala Godot 4.x estándar (no .NET), importa `project.godot` y pulsa **F5**. El desarrollo y las pruebas automatizadas se realizaron con Godot 4.6.3. No se requieren paquetes, servicios, claves ni recursos externos.
 
 ## Pruebas
-
-Desde la raíz del proyecto:
 
 ```sh
 godot --headless --path . --editor --import --quit
@@ -77,9 +96,10 @@ godot --headless --path . --script tests/v02.gd
 godot --headless --path . --script tests/quests.gd
 godot --headless --path . --script tests/mobile.gd
 godot --headless --path . --script tests/v04.gd
+godot --headless --path . --script tests/v05.gd
 godot --headless --path . --quit-after 120
 ```
 
-La suite cubre carga, movimiento, cámara, dimensiones, colisiones, límites, rutas transitables, spawn, edificios, estudiantes ambientales, Marisol, ambas misiones, comedor, aulas, diario, viviendas, controles táctiles y guardado/carga.
+`tests/v05.gd` verifica versión centralizada, reloj, cambio de día, pausas modales, horario, tres materias, asistencia puntual/tarde/falta, duplicados, actividad, calificación, descanso, persistencia, compatibilidad anterior, saneamiento de posiciones, HUD, área segura, campus y controles táctiles. Las suites anteriores continúan comprobando movimiento, colisiones, cámara, viviendas, misiones, diario, guardado y simulación táctil.
 
-Estas comprobaciones se ejecutan en modo headless. En el entorno de desarrollo de V0.4 el escritorio compartido no estuvo disponible, por lo que queda pendiente una revisión visual manual del mapa y una prueba física en Windows, Android e iOS. También siguen pendientes la validación real de multitáctil, áreas seguras, rendimiento, suspensión y los presets/SDK de exportación móvil.
+En este entorno no fue posible efectuar revisión visual V0.5: el escritorio compartido no pudo inicializarse y no había servidor gráfico virtual disponible. Las validaciones reportadas son headless. Quedan pendientes una revisión visual manual V0.5 y pruebas físicas de multitáctil, áreas seguras, rendimiento y suspensión en Windows, Android e iOS.

@@ -5,12 +5,15 @@ const NpcScene = preload("res://characters/npc.tscn")
 const CampusMap = preload("res://maps/campus.gd")
 const AmbientStudent = preload("res://scripts/ambient_student.gd")
 const DialogueUI = preload("res://scripts/dialogue_ui.gd")
+const AcademicManager = preload("res://scripts/academic_manager.gd")
+const GameHud = preload("res://scripts/game_hud.gd")
 const INTERACTION_DISTANCE := 90.0
 const CAMPUS_SIZE := Vector2(3200, 2200)
 const CAMPUS_SPAWN := Vector2(1350, 1190)
 const GUIDE_POSITION := Vector2(1490, 1190)
 const HOUSING_DOOR := Vector2(1064, 1555)
 const ROOM_DOOR := Vector2(570, 600)
+const SLEEP_POINT := Vector2(470, 320)
 var student: CharacterBody2D
 var guide: StaticBody2D
 var ui: CanvasLayer
@@ -19,6 +22,8 @@ var current_location := "campus"
 var door := HOUSING_DOOR
 var touch: Control
 var story: Node2D
+var academic: Node
+var hud: Control
 var ambient_students: Array[Node2D] = []
 
 func _ready() -> void:
@@ -35,54 +40,25 @@ func _ready() -> void:
 	spawn_ambient_students(people)
 	ui = DialogueUI.new()
 	add_child(ui)
-	ui.closed.connect(func(): student.controls_enabled = true)
+	ui.closed.connect(sync_modal_state)
 	if not Session.profile.is_empty():
 		student.apply_profile(Session.profile)
 		set_location(Session.location, Session.saved_position)
 	else:
 		set_location("campus", CAMPUS_SPAWN)
-	var save_button := Button.new()
-	save_button.text = "Guardar"
-	save_button.position = Vector2(24, 75)
-	save_button.pressed.connect(func(): save_button.text = "Guardado" if save_current() else "Error al guardar")
-	ui.add_child(save_button)
-	var menu_button := Button.new()
-	menu_button.text = "Guardar y menú"
-	menu_button.position = Vector2(140, 75)
-	menu_button.pressed.connect(func():
-		if save_current():
-			get_tree().change_scene_to_file("res://scenes/menu.tscn")
-		else:
-			menu_button.text = "Error al guardar")
-	ui.add_child(menu_button)
-	var identity := Label.new()
-	identity.position = Vector2(330, 80)
-	identity.text = Session.profile.get("name", "Estudiante")
-	ui.add_child(identity)
-	for control in [save_button, menu_button]:
-		control.custom_minimum_size = Vector2(110, 52)
 	touch = preload("res://scripts/touch_controls.gd").new()
 	ui.add_child(touch)
-	var layout := func():
-		var safe := preload("res://scripts/safe_layout.gd").rect(get_viewport())
-		save_button.position = safe.position + Vector2(0, 54)
-		menu_button.position = safe.position + Vector2(125, 54)
-		identity.position = safe.position + Vector2(340, 70)
-	get_viewport().size_changed.connect(layout)
-	layout.call()
 	story = preload("res://scripts/campus_story.gd").new()
 	story.world = self
 	add_child(story)
-	var journal_button := Button.new()
-	journal_button.text = "Diario (J)"
-	journal_button.custom_minimum_size = Vector2(130, 52)
-	ui.add_child(journal_button)
-	journal_button.pressed.connect(story.toggle_journal)
-	var journal_layout := func():
-		var safe := preload("res://scripts/safe_layout.gd").rect(get_viewport())
-		journal_button.position = Vector2(safe.end.x - 130, safe.position.y + 54)
-	get_viewport().size_changed.connect(journal_layout)
-	journal_layout.call()
+	academic = AcademicManager.new()
+	academic.world = self
+	academic.classroom_entry = story.CLASSROOM_ENTRY
+	add_child(academic)
+	hud = GameHud.new()
+	hud.world = self
+	ui.add_child(hud)
+	sync_modal_state()
 
 func set_location(value: String, point: Vector2) -> void:
 	if is_instance_valid(map):
@@ -119,6 +95,17 @@ func near_door() -> bool:
 	var target := door if current_location == "campus" else ROOM_DOOR
 	return student.position.distance_to(target) < 75
 
+func near_sleep() -> bool:
+	return current_location != "campus" and student.position.distance_to(SLEEP_POINT) < 90
+
+func sleep_until_tomorrow() -> void:
+	Session.academics.update_absences(Session.clock.day + 1, Session.clock.DEFAULT_MINUTE)
+	Session.clock.sleep_to_next_day()
+	save_current()
+	student.controls_enabled = false
+	var lines: Array[String] = ["Dormiste hasta el siguiente día. Tu horario avanzó; tu ropa decidió no opinar.", Session.clock.label()]
+	ui.open_dialogue("Descanso", lines)
+
 func travel() -> void:
 	if current_location == "campus":
 		set_location(Session.profile.get("housing", "internado"), Vector2(570, 500))
@@ -148,7 +135,7 @@ func spawn_ambient_students(parent: Node2D) -> void:
 		ambient_students.append(person)
 
 func configure_input() -> void:
-	var bindings := {"move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT], "move_up": [KEY_W, KEY_UP], "move_down": [KEY_S, KEY_DOWN], "interact": [KEY_E], "close_dialogue": [KEY_ESCAPE], "journal": [KEY_J]}
+	var bindings := {"move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT], "move_up": [KEY_W, KEY_UP], "move_down": [KEY_S, KEY_DOWN], "interact": [KEY_E], "close_dialogue": [KEY_ESCAPE], "journal": [KEY_J], "academic": [KEY_H]}
 	for action in bindings:
 		if not InputMap.has_action(action):
 			InputMap.add_action(action)
@@ -158,18 +145,56 @@ func configure_input() -> void:
 			InputMap.action_add_event(action, event)
 
 func _process(_delta: float) -> void:
+	if has_blocking_modal():
+		ui.prompt.text = ""
+		return
 	ui.prompt.text = "[E] Hablar con Marisol" if can_interact() and not ui.is_open else ""
 	if near_door() and not ui.is_open:
 		ui.prompt.text = "[E] Volver a tu vivienda" if current_location == "campus" else "[E] Salir al campus"
+	if near_sleep() and not ui.is_open:
+		ui.prompt.text = "[E / Acción] Dormir hasta mañana"
 	if is_instance_valid(story) and not story.nearby().is_empty() and not ui.is_open:
 		ui.prompt.text = "[E / Acción] Consultar " + story.nearby()
+	if is_instance_valid(academic) and academic.near_classroom() and not ui.is_open:
+		ui.prompt.text = academic.prompt_text()
 
 func can_interact() -> bool:
 	return current_location == "campus" and student.position.distance_to(guide.position) <= INTERACTION_DISTANCE
 
+func has_blocking_modal() -> bool:
+	return (is_instance_valid(ui) and ui.is_open) \
+		or (is_instance_valid(story) and is_instance_valid(story.journal) and story.journal.visible) \
+		or (is_instance_valid(academic) and is_instance_valid(academic.ui) and academic.ui.visible) \
+		or (is_instance_valid(hud) and is_instance_valid(hud.help_panel) and hud.help_panel.visible)
+
+func sync_modal_state() -> void:
+	if not is_instance_valid(student) or not is_instance_valid(touch):
+		return
+	var blocked := has_blocking_modal()
+	student.controls_enabled = not blocked
+	if blocked:
+		touch.release_all()
+	touch.visible = not blocked and (OS.has_feature("mobile") or touch.test_mode)
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("journal") and not event.is_echo():
-		story.toggle_journal()
+		if not is_instance_valid(academic.ui) or not academic.ui.visible:
+			story.toggle_journal()
+		get_viewport().set_input_as_handled()
+		return
+	if event.is_action_pressed("academic") and not event.is_echo():
+		if not story.journal.visible and not hud.help_panel.visible and not ui.is_open:
+			academic.ui.toggle_overview()
+		get_viewport().set_input_as_handled()
+		return
+	if is_instance_valid(academic.ui) and academic.ui.visible:
+		if event.is_action_pressed("close_dialogue"):
+			academic.ui.close_panel()
+		get_viewport().set_input_as_handled()
+		return
+	if is_instance_valid(hud.help_panel) and hud.help_panel.visible:
+		if event.is_action_pressed("close_dialogue"):
+			hud.toggle_help()
 		get_viewport().set_input_as_handled()
 		return
 	if is_instance_valid(story) and story.journal.visible:
@@ -179,12 +204,16 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("interact") and not event.is_echo():
 		if ui.is_open:
 			ui.advance()
+		elif near_sleep():
+			sleep_until_tomorrow()
 		elif near_door():
 			travel()
 		elif can_interact():
 			story.marisol()
 			student.controls_enabled = false
 			ui.open_dialogue(guide.DISPLAY_NAME, guide.DIALOGUE)
+		elif academic.interact():
+			pass
 		elif story.interact():
 			pass
 		get_viewport().set_input_as_handled()

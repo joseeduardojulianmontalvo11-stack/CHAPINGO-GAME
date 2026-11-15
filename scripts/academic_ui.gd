@@ -1,0 +1,168 @@
+extends PanelContainer
+## Panel academico modal compatible con teclado, mouse y tacto.
+
+const Layout = preload("res://scripts/safe_layout.gd")
+const Schedule = preload("res://scripts/academic_schedule.gd")
+var manager: Node
+var body: VBoxContainer
+var title: Label
+var notice := ""
+var answer_controls: Array[OptionButton] = []
+
+func _ready() -> void:
+	var margin := MarginContainer.new()
+	for side in ["left", "top", "right", "bottom"]:
+		margin.add_theme_constant_override("margin_" + side, 18)
+	add_child(margin)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 10)
+	margin.add_child(column)
+	var nav := HBoxContainer.new()
+	nav.add_theme_constant_override("separation", 8)
+	column.add_child(nav)
+	for pair in [["Resumen", show_overview], ["Horario", show_schedule], ["Historial", show_history]]:
+		var button := _button(pair[0])
+		button.pressed.connect(pair[1])
+		nav.add_child(button)
+	var close := _button("Cerrar (H/Esc)")
+	close.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	close.pressed.connect(close_panel)
+	nav.add_child(close)
+	title = Label.new()
+	title.add_theme_font_size_override("font_size", 25)
+	column.add_child(title)
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	column.add_child(scroll)
+	body = VBoxContainer.new()
+	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body.add_theme_constant_override("separation", 12)
+	scroll.add_child(body)
+	get_viewport().size_changed.connect(reflow)
+	reflow()
+	hide()
+
+func _button(label: String) -> Button:
+	var control := Button.new()
+	control.text = label
+	control.custom_minimum_size.y = 52
+	return control
+
+func _clear() -> void:
+	answer_controls.clear()
+	for child in body.get_children():
+		body.remove_child(child)
+		child.queue_free()
+
+func _label(value: String, font_size := 20) -> Label:
+	var label := Label.new()
+	label.text = value
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.add_theme_font_size_override("font_size", font_size)
+	body.add_child(label)
+	return label
+
+func open_with_notice(value: String) -> void:
+	notice = value
+	show_overview()
+	show()
+	manager.world.sync_modal_state()
+
+func toggle_overview() -> void:
+	if visible:
+		close_panel()
+	elif not manager.world.has_blocking_modal():
+		notice = ""
+		show_overview()
+		show()
+		manager.world.sync_modal_state()
+
+func show_overview() -> void:
+	_clear()
+	title.text = "Vida académica"
+	if not notice.is_empty():
+		_label(notice, 21)
+	var current: Dictionary = manager.current_session()
+	if current.is_empty():
+		_label("Ahora no hay clase disponible. El campus acepta exploradores sin justificante.")
+	else:
+		var subject: Dictionary = Schedule.SUBJECTS[current["subject_id"]]
+		_label("CLASE DISPONIBLE\n%s · %s" % [subject["name"], subject["professor"]], 22)
+	var next: Dictionary = manager.next_session()
+	if not next.is_empty():
+		var definition: Dictionary = Schedule.SUBJECTS[next["subject_id"]]
+		_label("PRÓXIMA CLASE\n%s · Día %d (%s) · %s\n%s" % [definition["name"], next["day"], Session.clock.weekday_name(next["day"]), manager.schedule.format_minute(next["start"]), definition["location"]])
+	_label("Materias: Botánica, Matemáticas e Introducción a los Suelos. Horario ficticio para esta experiencia; no es un programa oficial de la UACh.", 17)
+
+func show_schedule() -> void:
+	_clear()
+	title.text = "Horario escolar"
+	for weekday in range(5):
+		_label(Session.clock.WEEKDAYS[weekday].to_upper(), 21)
+		var sessions: Array[Dictionary] = manager.schedule.sessions_for_weekday(weekday)
+		if sessions.is_empty():
+			_label("Sin clases. Incluso el calendario necesita respirar.", 17)
+		for session in sessions:
+			var subject: Dictionary = Schedule.SUBJECTS[session["subject_id"]]
+			_label("%s–%s · %s\n%s · %s" % [manager.schedule.format_minute(session["start"]), manager.schedule.format_minute(session["start"] + session["duration"]), subject["name"], subject["professor"], subject["location"]], 18)
+
+func show_history() -> void:
+	_clear()
+	title.text = "Historial académico"
+	_label("ASISTENCIAS", 21)
+	if Session.academics.attendance.is_empty():
+		_label("Todavía no hay registros.")
+	else:
+		var keys: Array = Session.academics.attendance.keys()
+		keys.sort()
+		for key in keys:
+			var entry: Dictionary = Session.academics.attendance[key]
+			var subject: Dictionary = Schedule.SUBJECTS[entry["subject_id"]]
+			_label("Día %d · %s — %s" % [entry["day"], subject["name"], str(entry["status"]).replace("_", " ").capitalize()], 18)
+	_label("CALIFICACIONES", 21)
+	if Session.academics.grades.is_empty():
+		_label("Sin actividades evaluadas. El cero aún no te conoce.")
+	else:
+		for id in Session.academics.grades:
+			_label("%s — %.1f / 10" % [Schedule.SUBJECTS[id]["name"], Session.academics.grades[id]], 20)
+
+func show_activity(subject_id: String, attendance_message: String) -> void:
+	_clear()
+	var subject: Dictionary = Schedule.SUBJECTS[subject_id]
+	title.text = "Actividad · " + subject["name"]
+	_label(attendance_message + " Tres preguntas separan tu calificación de una anécdota.")
+	for question in subject["questions"]:
+		_label(question["text"], 19)
+		var choice := OptionButton.new()
+		choice.custom_minimum_size.y = 52
+		for option in question["options"]:
+			choice.add_item(option)
+		body.add_child(choice)
+		answer_controls.append(choice)
+	var submit := _button("Entregar actividad")
+	submit.pressed.connect(func(): _submit(subject_id))
+	body.add_child(submit)
+	show()
+	manager.world.sync_modal_state()
+
+func _submit(subject_id: String) -> void:
+	var answers: Array = []
+	for choice in answer_controls:
+		answers.append(choice.selected)
+	var grade := Session.academics.grade_activity(subject_id, answers)
+	if grade < 0:
+		notice = "Esta actividad ya fue evaluada. La agricultura regenera; los puntos infinitos, no."
+	else:
+		notice = "Calificación: %.1f / 10. %s" % [grade, "La cosecha académica fue buena." if grade >= 6 else "Hay suelo fértil para mejorar."]
+	manager.world.save_current()
+	show_history()
+	_label(notice, 21)
+
+func close_panel() -> void:
+	hide()
+	manager.world.sync_modal_state()
+
+func reflow() -> void:
+	var safe := Layout.rect(get_viewport())
+	position = safe.position + Vector2(0, 60)
+	size = Vector2(safe.size.x, safe.size.y - 60)

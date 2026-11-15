@@ -1,5 +1,7 @@
 extends CanvasLayer
 
+const AppInfo = preload("res://scripts/app_info.gd")
+
 signal closed
 var panel: PanelContainer
 var speaker: Label
@@ -13,7 +15,7 @@ var header: Label
 func _ready() -> void:
 	header = Label.new()
 	header.position = Vector2(24, 18)
-	header.text = "CHAPINGO: VIDA UNIVERSITARIA  ·  V0.3\nWASD / Flechas: caminar    E: interactuar    J: diario    Esc: cerrar    Ctrl + Shift + M: prueba táctil"
+	header.text = "CHAPINGO · " + AppInfo.VERSION
 	header.add_theme_font_size_override("font_size", 15)
 	header.add_theme_color_override("font_shadow_color", Color("24382b"))
 	header.add_theme_constant_override("shadow_offset_x", 2)
@@ -49,8 +51,8 @@ func _ready() -> void:
 
 func _resize() -> void:
 	var safe := preload("res://scripts/safe_layout.gd").rect(get_viewport())
-	header.position = safe.position
-	prompt.position = safe.position + Vector2(0, 115)
+	header.position = safe.position + Vector2(0, 58)
+	prompt.position = safe.position + Vector2(0, 80)
 	panel.position = Vector2(safe.position.x, safe.end.y - 470)
 	panel.size = Vector2(safe.size.x, 225)
 

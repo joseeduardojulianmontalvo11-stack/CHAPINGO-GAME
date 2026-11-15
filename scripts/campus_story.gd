@@ -16,9 +16,7 @@ func toggle_journal() -> void:
 	if world.ui.is_open:
 		return
 	journal.visible = not journal.visible
-	world.student.controls_enabled = not journal.visible
-	world.touch.release_all()
-	world.touch.visible = not journal.visible and (OS.has_feature("mobile") or world.touch.test_mode)
+	world.sync_modal_state()
 
 func marisol() -> void:
 	Session.quests.start("primer_salon")

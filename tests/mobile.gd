@@ -81,9 +81,7 @@ func run() -> void:
 	tap(touch, 6, touch.stick_center + Vector2(60, 0))
 	touch._notification(Control.NOTIFICATION_APPLICATION_FOCUS_OUT)
 	check(not Input.is_action_pressed("move_right"), "Pérdida de foco libera joystick")
-	for child in world.ui.get_children():
-		if child is Button and child.text == "Guardar":
-			child.pressed.emit()
+	world.hud.save_button.pressed.emit()
 	check(session.load_game() and session.location == "campus", "Botón Guardar persiste partida")
 	root.size = Vector2i(2532, 1170)
 	await process_frame
