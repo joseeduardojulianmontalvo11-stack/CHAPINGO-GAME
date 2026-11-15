@@ -33,7 +33,7 @@ func run() -> void:
 		await physics_frame
 	Input.action_release("move_right")
 	check(world.student.position.x > origin.x + 10, "El estudiante camina con la entrada de movimiento")
-	world.student.position = Vector2(650, 370)
+	world.student.position = Vector2(1750, 590)
 	Input.action_press("move_up")
 	Input.action_press("move_right")
 	await physics_frame
@@ -41,18 +41,18 @@ func run() -> void:
 	check(absf(world.student.velocity.length() - 220.0) < 0.1, "La diagonal conserva la velocidad")
 	Input.action_release("move_up")
 	Input.action_release("move_right")
-	world.student.position = Vector2(850, 370)
+	world.student.position = Vector2(1590, 510)
 	Input.action_press("move_up")
 	for i in 30:
 		await physics_frame
 	Input.action_release("move_up")
-	check(world.student.position.y >= 349, "El edificio bloquea al estudiante")
-	world.student.position = Vector2(1780, 600)
+	check(world.student.position.y >= 479, "El edificio bloquea al estudiante")
+	world.student.position = Vector2(3180, 600)
 	Input.action_press("move_right")
 	for i in 20:
 		await physics_frame
 	Input.action_release("move_right")
-	check(world.student.position.x <= 1791, "El límite del mapa bloquea al estudiante")
+	check(world.student.position.x <= 3191, "El límite del mapa bloquea al estudiante")
 	world.student.position = world.guide.position + Vector2(-55, 0)
 	interact(world)
 	check(world.ui.is_open and not world.student.controls_enabled, "E cerca del NPC abre diálogo y bloquea movimiento")

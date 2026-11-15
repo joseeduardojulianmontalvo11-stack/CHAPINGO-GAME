@@ -1,88 +1,85 @@
-# CHAPINGO: VIDA UNIVERSITARIA — V0.3
+# CHAPINGO: VIDA UNIVERSITARIA — V0.4
 
-## Primeras misiones
+Simulador universitario 2D de vista superior inspirado en la Universidad Autónoma Chapingo. El campus es una representación original construida con primitivas de Godot; no utiliza el mapa institucional como fondo ni intenta reproducirlo a escala.
 
-La exploración sigue siendo libre. Hablar con Marisol activa **¿Dónde está mi salón?** una sola vez. Busca la entrada marcada bajo AULAS, al noreste; entrar en la zona completa la misión y muestra una bienvenida. No necesitas interactuar con una puerta ni entrar al edificio.
+## Campus V0.4
 
-Para **El primer desayuno**, consulta con E o Acción el **Aviso** del comedor (izquierda de su entrada); luego consulta el **Menú** a su derecha. Es opcional y puede estar activa junto con la principal. No hay inventario, economía ni alimentación.
+El exterior creció de 1800×1200 a 3200×2200. Una red de caminos conecta la zona central y el Patio de Honor con:
 
-**J** o el botón **Diario (J)** abre y cierra el diario. El botón Cerrar del diario también permite usarlo con tacto. Agrupa principales activas, secundarias activas y completadas con sus objetivos y consecuencias. Se puede desplazar; al cerrarlo vuelve el movimiento.
+- Rectoría.
+- Biblioteca Central.
+- Comedor Central.
+- Auditorio Álvaro Carrillo.
+- Preparatoria Agrícola y su acceso a aulas.
+- Dormitorios.
+- La Meche.
+- Jardines y áreas deportivas.
 
-El progreso de misiones se guarda al actualizarse y con los controles de guardado existentes. Los guardados V0.2/V0.2.1 sin el campo opcional `quests` se leen como partidas sin misiones iniciadas, sin reescribir el archivo durante la lectura. Mantienen personaje, vivienda y posición. Guarda antes de cerrar para conservar la última posición.
+Los edificios tienen paletas y fachadas diferenciadas, techos con aleros, puertas, ventanas, letreros y detalles propios. El campus incorpora árboles de copa variable, jardines con flores, bancas, luminarias, señalización, canchas y caminos texturizados. Edificios, troncos, bancas, luminarias y límites comparten geometría coherente con sus colisiones.
 
-Arquitectura: `scripts/quests.gd` define misiones, estados, objetivos con identificadores estables y eventos; `scripts/campus_story.gd` conecta interacciones y zonas del mapa; `scripts/quest_journal.gd` presenta el diario. Las futuras misiones pueden usar nuevos datos y eventos, incluyendo varios objetivos ordenados.
+Cinco estudiantes secundarios recorren rutas cortas con apariencias variadas. Son elementos ambientales sin cuerpo de colisión para no bloquear al protagonista ni interferir con las misiones.
 
-Prueba adicional: `godot --headless --path . --script tests/quests.gd`. Usa `prueba-quests.json`, separado del guardado del jugador. Las validaciones automatizadas no sustituyen pruebas visuales o físicas en Windows/Android/iOS.
+La cámara, el punto inicial, Marisol, el acceso a vivienda y las zonas de aulas/comedor se actualizaron para el mapa ampliado. Los interiores y las partidas V0.3 siguen usando el mismo formato de guardado.
 
-## Preparación para teléfonos
+## Funciones conservadas
 
-Un solo proyecto GDScript con renderizador Compatibility. Orientación horizontal, lienzo expandible, márgenes que consultan el área segura del dispositivo, creador desplazable y botones de al menos 48 unidades. El diálogo queda por encima de los controles inferiores.
+- Creador de personaje con nombre, apariencia, cabello y tono de piel.
+- Elección entre internado y vivienda externa, con interiores separados.
+- Movimiento con velocidad diagonal normalizada y cámara limitada al mapa.
+- NPC Marisol y diálogo en español.
+- Misión principal **¿Dónde está mi salón?**.
+- Misión secundaria **El primer desayuno**.
+- Diario de misiones con estados, objetivos y consecuencias.
+- Guardado/carga de perfil, vivienda, ubicación, posición y misiones.
+- Joystick y controles táctiles; simulación en escritorio con **Ctrl + Shift + M**.
 
-En móviles se muestran automáticamente un joystick izquierdo y los botones **Acción** (interactuar o avanzar diálogo) y **Cerrar**. Guardar y Guardar y menú siguen accesibles en la parte superior. Los menús utilizan la entrada táctil estándar de Godot. Cada dedo tiene seguimiento independiente: se puede mantener el joystick y pulsar Acción con otro dedo. Perder el foco o cambiar el tamaño libera el joystick.
-
-En Windows pulsa **Ctrl + Shift + M** durante la partida para mostrar u ocultar los controles y arrastra el joystick con el mouse. También puedes ejecutar `godot --path . -- --touch-test`. El mouse simula un dedo; la simultaneidad de dedos se verifica mediante eventos sintéticos en `tests/mobile.gd`. WASD, flechas, E y Esc siguen disponibles.
-
-Prueba automatizada adicional: `godot --headless --path . --script tests/mobile.gd`. Las pruebas usan archivos separados de la partida real.
-
-No se ha validado en dispositivos Android o iOS. Quedan pendientes pruebas físicas de multitáctil, teclado virtual, áreas seguras y legibilidad, así como rendimiento y ciclo de suspensión en ambos sistemas. Para exportar harán falta las plantillas de Godot, un preset y SDK/JDK para Android; para iOS, macOS con Xcode, preset, firma y aprovisionamiento de Apple. No se han generado APK ni aplicaciones iOS. La orientación vertical no es el objetivo de esta versión.
-
-## Nueva partida y guardado
-
-F5 abre el menú principal. **Nueva partida** permite elegir nombre (vacío usa «Estudiante»), tres camisas, cuatro colores de cabello, cuatro tonos de piel y vivienda, con vista previa. Comenzar reemplaza el guardado anterior.
-
-Cada vivienda tiene un interior propio con cama, escritorio y colisiones. Acércate a la puerta amarilla y pulsa **E** para salir. En el campus, el letrero «Tu vivienda · E» al oeste de Marisol permite regresar a la vivienda elegida.
-
-**Guardar** conserva nombre, apariencia, vivienda, ubicación y posición. **Guardar y menú** permite volver al menú; **Continuar** recupera una partida válida. También se guarda al comenzar y cambiar de ubicación. Cerrar la ventana sin guardar pierde el movimiento posterior al último guardado.
-
-El archivo es `user://partida.json`; en Windows está en `%APPDATA%/Godot/app_userdata/CHAPINGO- VIDA UNIVERSITARIA/`. No se incorpora a Git. Solo hay una ranura de guardado; una partida inválida deshabilita Continuar.
-
-Nuevos componentes: `scenes/menu.tscn`, `scripts/menu.gd` (menú y creador), `scripts/session.gd` (autoload de datos y persistencia), `maps/room.gd` (interior reutilizable), `tests/v02.gd` (creación, viviendas, transiciones y guardado). El campus sigue en `scenes/main.tscn`.
-
-Ejecuta también `godot --headless --path . --script tests/v02.gd`. Esta prueba usa `prueba-v02.json`, separado de la partida del jugador.
-
-Primera base jugable de un simulador universitario 2D inspirado en Chapingo, México. Mapa provisional original, sin pretensión de representar fielmente el campus real.
-
-## Abrir y ejecutar en Windows
-
-1. Instala **Godot 4.x estándar** (GDScript; no necesitas la versión .NET). Validado con Godot 4.6.3.
-2. Descarga o clona este repositorio y abre Godot.
-3. Selecciona **Importar**, elige `project.godot` y pulsa **Importar y editar**.
-4. Pulsa **F6** para ejecutar la escena abierta o **F5** para ejecutar el juego. La escena principal ya está configurada.
-
-No se necesitan paquetes, servicios, claves ni recursos externos.
+Hablar con Marisol inicia la misión principal. Cruza el Patio de Honor hacia Preparatoria Agrícola y entra en la zona marcada bajo AULAS. Para la misión del comedor, consulta primero el Aviso y después el Menú junto al acceso del Comedor Central. **J** o **Diario (J)** abre el diario.
 
 ## Controles
 
-- **WASD o flechas**: caminar. Las diagonales mantienen la misma velocidad.
-- **E**: conversar con Marisol cuando aparezca el indicador; avanzar el diálogo.
-- **Esc**: cerrar el diálogo. El movimiento queda detenido durante la conversación.
+- **WASD o flechas:** caminar.
+- **E:** interactuar, conversar o avanzar diálogo.
+- **Esc:** cerrar diálogo.
+- **J:** abrir/cerrar el diario.
+- **Ctrl + Shift + M:** mostrar u ocultar la simulación de controles táctiles.
 
-Explora los caminos, jardines, comedor, biblioteca y aulas. Los edificios, jardines elevados, troncos, NPC y límites del mapa tienen colisión. La cámara sigue al estudiante y respeta los límites del campus.
+En móviles se muestran automáticamente un joystick izquierdo y los botones **Acción** y **Cerrar**. Cada dedo se procesa de forma independiente y perder el foco libera el joystick. Los márgenes se adaptan al área segura y los blancos táctiles principales miden al menos 48 unidades.
 
-## Organización
+## Arquitectura
 
-- `scenes/main.tscn`: escena principal lista para ejecutar.
-- `scripts/main.gd`: creación del mundo, entrada e interacción por proximidad.
-- `scripts/student.gd`: movimiento y gráfico provisional del protagonista.
-- `scripts/npc.gd`: representación y conversación de Marisol.
-- `scripts/dialogue_ui.gd`: interfaz y ventana de diálogo.
-- `characters/`: escenas reutilizables del estudiante y NPC.
-- `maps/campus.gd`: mapa, gráficos y obstáculos.
-- `resources/`: espacio para futuros recursos originales.
-- `tests/smoke.gd`: prueba funcional sin interfaz gráfica.
+- `maps/campus.gd`: datos, distribución, caminos, mobiliario y comprobaciones transitables del campus.
+- `scripts/campus_building.gd`: componente reutilizable de edificio; dibujo y colisión parten de la misma huella.
+- `scripts/campus_tree.gd`: árbol reutilizable con copa variable y colisión en el tronco.
+- `scripts/ambient_student.gd`: apariencia y rutas de estudiantes secundarios sin bloqueo.
+- `scripts/main.gd`: ciclo del mundo, ubicaciones, cámara, personas e interacción.
+- `scripts/campus_story.gd`: zonas e interacciones de las misiones del exterior.
+- `scripts/quests.gd` y `scripts/quest_journal.gd`: datos, progreso y diario de misiones.
+- `maps/room.gd`: interior reutilizable para internado y vivienda externa.
+- `scripts/session.gd`: perfil y persistencia.
+- `scripts/touch_controls.gd`: joystick, botones táctiles y simulación en escritorio.
 
-## Comprobación desde terminal
+El proyecto conserva GDScript y el renderizador **GL Compatibility**, con orientación horizontal y sin dependencias externas.
 
-Con el ejecutable de Godot en PATH (en Windows puede llamarse `Godot_v4.6.3-stable_win64_console.exe`):
+## Abrir y ejecutar
+
+Instala Godot 4.x estándar (no .NET), importa `project.godot` y pulsa **F5**. Validado automáticamente con Godot 4.6.3. No se requieren paquetes, servicios, claves ni recursos externos.
+
+El guardado normal está en `user://partida.json`; en Windows corresponde a `%APPDATA%/Godot/app_userdata/CHAPINGO- VIDA UNIVERSITARIA/`. Hay una ranura. **Guardar** conserva el estado actual y **Guardar y menú** vuelve al menú principal.
+
+## Pruebas
+
+Desde la raíz del proyecto:
 
 ```sh
 godot --headless --path . --editor --import --quit
 godot --headless --path . --script tests/smoke.gd
+godot --headless --path . --script tests/v02.gd
+godot --headless --path . --script tests/quests.gd
+godot --headless --path . --script tests/mobile.gd
+godot --headless --path . --script tests/v04.gd
 godot --headless --path . --quit-after 120
 ```
 
-La prueba verifica carga, movimiento, colisiones, proximidad, conversación y recuperación del movimiento. La revisión visual e interacción manual en Windows quedan pendientes si solo se dispone de Linux headless.
+La suite cubre carga, movimiento, cámara, dimensiones, colisiones, límites, rutas transitables, spawn, edificios, estudiantes ambientales, Marisol, ambas misiones, comedor, aulas, diario, viviendas, controles táctiles y guardado/carga.
 
-## Alcance
-
-Los gráficos se dibujan con primitivas originales y la fuente integrada del motor. No hay audio, horarios ni calificaciones todavía. Los recursos son deliberadamente provisionales. La revisión visual manual en Windows sigue pendiente.
+Estas comprobaciones se ejecutan en modo headless. En el entorno de desarrollo de V0.4 el escritorio compartido no estuvo disponible, por lo que queda pendiente una revisión visual manual del mapa y una prueba física en Windows, Android e iOS. También siguen pendientes la validación real de multitáctil, áreas seguras, rendimiento, suspensión y los presets/SDK de exportación móvil.

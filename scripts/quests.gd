@@ -2,7 +2,7 @@ extends RefCounted
 ## Definiciones independientes del mapa. Añadir misiones requiere nuevos datos y eventos.
 signal changed
 const DEFINITIONS := {
-	"primer_salon": {"name": "¿Dónde está mi salón?", "description": "Marisol te ayuda a orientarte en tu primer día.", "type": "principal", "objectives": [{"id": "encontrar_aulas", "text": "Encuentra la entrada de AULAS, al noreste del campus.", "event": "entrada_aulas"}], "consequence": "Ya sabes llegar a las aulas. Recordar para qué ibas es otro asunto."},
+	"primer_salon": {"name": "¿Dónde está mi salón?", "description": "Marisol te ayuda a orientarte en tu primer día.", "type": "principal", "objectives": [{"id": "encontrar_aulas", "text": "Cruza el Patio de Honor y encuentra la entrada de AULAS, al este.", "event": "entrada_aulas"}], "consequence": "Ya sabes llegar a las aulas. Recordar para qué ibas es otro asunto."},
 	"primer_desayuno": {"name": "El primer desayuno", "description": "Descubre cómo conseguir tu primer desayuno en el comedor.", "type": "secundaria", "objectives": [{"id": "consultar_menu", "text": "Consulta el menú junto a la entrada del comedor.", "event": "menu_comedor"}], "consequence": "El menú dice: desayuno después de formarse. ¡Has descubierto la primera materia: paciencia aplicada!"}
 }
 var progress: Dictionary = {}

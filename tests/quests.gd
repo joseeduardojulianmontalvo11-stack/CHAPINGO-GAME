@@ -17,7 +17,7 @@ func run() -> void:
 	session.new_game({"name": "Ana", "housing": "externa", "appearance": 0, "hair": "382d29", "skin": "c9936c"})
 	var world = load("res://scenes/main.tscn").instantiate()
 	root.add_child(world)
-	world.set_location("campus", Vector2(880, 590))
+	world.set_location("campus", world.guide.position + Vector2(-55, 0))
 	await process_frame
 	interact(world)
 	check(session.quests.state("primer_salon") == "activa", "Conversar con Marisol activa misión")
@@ -39,7 +39,7 @@ func run() -> void:
 	interact(world)
 	check(session.quests.state("primer_desayuno") == "completada", "Interacción completa desayuno")
 	world.ui.close_dialogue()
-	world.student.position = Vector2(1430, 380)
+	world.student.position = world.story.CLASSROOM_ENTRY.get_center()
 	await process_frame
 	await process_frame
 	check(session.quests.state("primer_salon") == "completada" and world.ui.is_open, "Zona de entrada completa principal y muestra bienvenida")

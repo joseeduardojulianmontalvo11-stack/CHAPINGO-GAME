@@ -55,7 +55,7 @@ func run() -> void:
 	mouse.pressed = false
 	touch._input(mouse)
 	check(not Input.is_action_pressed("move_right"), "Soltar mouse libera movimiento")
-	world.set_location("campus", Vector2(880, 590))
+	world.set_location("campus", world.guide.position + Vector2(-55, 0))
 	await process_frame
 	await process_frame
 	tap(touch, 0, touch.stick_center)
@@ -74,7 +74,7 @@ func run() -> void:
 	tap(touch, 4, touch.interact_center)
 	await process_frame
 	check(world.current_location == "internado", "Acción entra en vivienda")
-	world.student.position = world.door - Vector2(0, 40)
+	world.student.position = world.ROOM_DOOR - Vector2(0, 40)
 	tap(touch, 5, touch.interact_center)
 	await process_frame
 	check(world.current_location == "campus", "Acción sale al campus")

@@ -1,8 +1,8 @@
 extends Node2D
 ## Adaptador de eventos del campus. No controla el movimiento ni sustituye diálogos.
-const BREAKFAST_SIGN := Vector2(230, 405)
-const BREAKFAST_MENU := Vector2(440, 405)
-const CLASSROOM_ENTRY := Rect2(1385, 345, 90, 95)
+const BREAKFAST_SIGN := Vector2(455, 1285)
+const BREAKFAST_MENU := Vector2(680, 1285)
+const CLASSROOM_ENTRY := Rect2(2550, 1145, 200, 90)
 var world: Node2D
 var journal: PanelContainer
 
@@ -65,4 +65,4 @@ func _draw() -> void:
 		draw_rect(Rect2(point - Vector2(20, 28), Vector2(40, 38)), Color("f1db9f"))
 		draw_string(ThemeDB.fallback_font, point + Vector2(-30, -35), "Aviso" if point == BREAKFAST_SIGN else "Menú", HORIZONTAL_ALIGNMENT_LEFT, -1, 18)
 	draw_rect(CLASSROOM_ENTRY, Color(0.9, 0.8, 0.4, 0.18))
-	draw_string(ThemeDB.fallback_font, Vector2(1375, 455), "Entrada aulas", HORIZONTAL_ALIGNMENT_LEFT, -1, 17)
+	draw_string(ThemeDB.fallback_font, Vector2(2560, 1228), "Entrada aulas", HORIZONTAL_ALIGNMENT_LEFT, -1, 17)

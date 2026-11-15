@@ -3,16 +3,23 @@ extends Node2D
 const StudentScene = preload("res://characters/student.tscn")
 const NpcScene = preload("res://characters/npc.tscn")
 const CampusMap = preload("res://maps/campus.gd")
+const AmbientStudent = preload("res://scripts/ambient_student.gd")
 const DialogueUI = preload("res://scripts/dialogue_ui.gd")
 const INTERACTION_DISTANCE := 90.0
+const CAMPUS_SIZE := Vector2(3200, 2200)
+const CAMPUS_SPAWN := Vector2(1350, 1190)
+const GUIDE_POSITION := Vector2(1490, 1190)
+const HOUSING_DOOR := Vector2(1064, 1555)
+const ROOM_DOOR := Vector2(570, 600)
 var student: CharacterBody2D
 var guide: StaticBody2D
 var ui: CanvasLayer
 var map: Node2D
 var current_location := "campus"
-var door := Vector2(580, 600)
+var door := HOUSING_DOOR
 var touch: Control
 var story: Node2D
+var ambient_students: Array[Node2D] = []
 
 func _ready() -> void:
 	configure_input()
@@ -20,11 +27,12 @@ func _ready() -> void:
 	people.y_sort_enabled = true
 	add_child(people)
 	student = StudentScene.instantiate()
-	student.position = Vector2(820, 600)
+	student.position = CAMPUS_SPAWN
 	people.add_child(student)
 	guide = NpcScene.instantiate()
-	guide.position = Vector2(935, 590)
+	guide.position = GUIDE_POSITION
 	people.add_child(guide)
+	spawn_ambient_students(people)
 	ui = DialogueUI.new()
 	add_child(ui)
 	ui.closed.connect(func(): student.controls_enabled = true)
@@ -32,7 +40,7 @@ func _ready() -> void:
 		student.apply_profile(Session.profile)
 		set_location(Session.location, Session.saved_position)
 	else:
-		set_location("campus", Vector2(820, 600))
+		set_location("campus", CAMPUS_SPAWN)
 	var save_button := Button.new()
 	save_button.text = "Guardar"
 	save_button.position = Vector2(24, 75)
@@ -90,10 +98,12 @@ func set_location(value: String, point: Vector2) -> void:
 	move_child(map, 0)
 	guide.visible = value == "campus"
 	guide.get_node("Colision").set_deferred("disabled", value != "campus")
+	for person in ambient_students:
+		person.visible = value == "campus"
 	student.position = point
 	var camera: Camera2D = student.get_node("Camara")
-	camera.limit_right = 1800 if value == "campus" else 1152
-	camera.limit_bottom = 1200 if value == "campus" else 720
+	camera.limit_right = int(CAMPUS_SIZE.x) if value == "campus" else 1152
+	camera.limit_bottom = int(CAMPUS_SIZE.y) if value == "campus" else 720
 	camera.reset_smoothing()
 	if not Session.profile.is_empty():
 		save_current()
@@ -106,13 +116,36 @@ func save_current() -> bool:
 	return Session.save_game()
 
 func near_door() -> bool:
-	return student.position.distance_to(door) < 75
+	var target := door if current_location == "campus" else ROOM_DOOR
+	return student.position.distance_to(target) < 75
 
 func travel() -> void:
 	if current_location == "campus":
 		set_location(Session.profile.get("housing", "internado"), Vector2(570, 500))
 	else:
-		set_location("campus", Vector2(580, 655))
+		set_location("campus", HOUSING_DOOR + Vector2(0, 65))
+
+func spawn_ambient_students(parent: Node2D) -> void:
+	var routes := [
+		[Vector2(1210, 1180), Vector2(1370, 1180), Vector2(1370, 1320), Vector2(1210, 1320)],
+		[Vector2(1680, 650), Vector2(1940, 650), Vector2(1940, 710), Vector2(1680, 710)],
+		[Vector2(2140, 1280), Vector2(2470, 1280), Vector2(2470, 1435), Vector2(2140, 1435)],
+		[Vector2(1045, 1530), Vector2(1045, 1870), Vector2(1150, 1870), Vector2(1150, 1530)],
+		[Vector2(2250, 1490), Vector2(2850, 1490), Vector2(2850, 1540), Vector2(2250, 1540)]
+	]
+	var palettes := [
+		[Color("4f7891"), Color("d9a47d"), Color("3b2c28")],
+		[Color("b86554"), Color("81583f"), Color("211c1b")],
+		[Color("d4a84e"), Color("efc39f"), Color("7a4d2d")],
+		[Color("597a5b"), Color("b87955"), Color("332724")],
+		[Color("825f94"), Color("6f4937"), Color("191718")]
+	]
+	for i in routes.size():
+		var person := AmbientStudent.new()
+		person.configure(routes[i], palettes[i], i)
+		person.name = "EstudianteSecundario%d" % (i + 1)
+		parent.add_child(person)
+		ambient_students.append(person)
 
 func configure_input() -> void:
 	var bindings := {"move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT], "move_up": [KEY_W, KEY_UP], "move_down": [KEY_S, KEY_DOWN], "interact": [KEY_E], "close_dialogue": [KEY_ESCAPE], "journal": [KEY_J]}
