@@ -19,7 +19,7 @@ func run() -> void:
 	session.save_path = "user://prueba-v05.json"
 	session.new_game(valid_profile())
 	var AppInfo = load("res://scripts/app_info.gd")
-	check(AppInfo.VERSION == "V0.5.3", "Version centralizada en V0.5.3")
+	check(AppInfo.VERSION == "V0.6", "Version centralizada en V0.6")
 	check(session.clock.label().contains("Lunes") and session.clock.time_text() == "08:00", "Reloj inicia el lunes a las 08:00")
 	session.clock.advance_minutes(1500)
 	check(session.clock.day == 2 and session.clock.time_text() == "09:00", "Reloj avanza hora y dia")
@@ -31,7 +31,7 @@ func run() -> void:
 	await physics_frame
 	await process_frame
 	world.academic.set_process(false)
-	check(world.ui.header.text == "CHAPINGO · V0.5.3" and not world.ui.header.text.contains("WASD"), "Indicador usa la version central y no ocupa espacio con instrucciones")
+	check(world.ui.header.text == "CHAPINGO · V0.6" and not world.ui.header.text.contains("WASD"), "Indicador usa la version central y no ocupa espacio con instrucciones")
 	check(not world.hud.help_panel.visible and world.hud.save_button.custom_minimum_size.y >= 48, "Ayuda inicia recogida y botones conservan tamaño tactil")
 	var safe := preload("res://scripts/safe_layout.gd").rect(root)
 	check(world.hud.position == safe.position and world.hud.top_panel.size.x == safe.size.x, "Barra superior respeta el area segura")

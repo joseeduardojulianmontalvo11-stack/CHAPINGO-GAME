@@ -23,6 +23,7 @@ var door := HOUSING_DOOR
 var touch: Control
 var story: Node2D
 var academic: Node
+var social: Node
 var hud: Control
 var ambient_students: Array[Node2D] = []
 
@@ -55,6 +56,9 @@ func _ready() -> void:
 	academic.world = self
 	academic.classroom_entry = story.CLASSROOM_ENTRY
 	add_child(academic)
+	social = preload("res://scripts/social_manager.gd").new()
+	social.world = self
+	add_child(social)
 	hud = GameHud.new()
 	hud.world = self
 	ui.add_child(hud)
@@ -135,7 +139,7 @@ func spawn_ambient_students(parent: Node2D) -> void:
 		ambient_students.append(person)
 
 func configure_input() -> void:
-	var bindings := {"move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT], "move_up": [KEY_W, KEY_UP], "move_down": [KEY_S, KEY_DOWN], "interact": [KEY_E], "close_dialogue": [KEY_ESCAPE], "journal": [KEY_J], "academic": [KEY_H]}
+	var bindings := {"move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT], "move_up": [KEY_W, KEY_UP], "move_down": [KEY_S, KEY_DOWN], "interact": [KEY_E], "close_dialogue": [KEY_ESCAPE], "journal": [KEY_J], "academic": [KEY_H], "social": [KEY_R]}
 	for action in bindings:
 		if not InputMap.has_action(action):
 			InputMap.add_action(action)
@@ -158,6 +162,9 @@ func _process(_delta: float) -> void:
 	if is_instance_valid(academic) and academic.near_classroom() and not ui.is_open:
 		ui.prompt.text = academic.prompt_text()
 
+	if is_instance_valid(social) and not social.nearby().is_empty():
+		ui.prompt.text = "[E / Acción] Conversar con " + social.Catalog.PEOPLE[social.nearby()]["name"]
+
 func can_interact() -> bool:
 	return current_location == "campus" and student.position.distance_to(guide.position) <= INTERACTION_DISTANCE
 
@@ -165,18 +172,30 @@ func has_blocking_modal() -> bool:
 	return (is_instance_valid(ui) and ui.is_open) \
 		or (is_instance_valid(story) and is_instance_valid(story.journal) and story.journal.visible) \
 		or (is_instance_valid(academic) and is_instance_valid(academic.ui) and academic.ui.visible) \
-		or (is_instance_valid(hud) and is_instance_valid(hud.help_panel) and hud.help_panel.visible)
+		or (is_instance_valid(hud) and is_instance_valid(hud.help_panel) and hud.help_panel.visible) \
+		or (is_instance_valid(social) and is_instance_valid(social.ui) and social.ui.visible)
 
 func sync_modal_state() -> void:
 	if not is_instance_valid(student) or not is_instance_valid(touch):
 		return
 	var blocked := has_blocking_modal()
 	student.controls_enabled = not blocked
+	if is_instance_valid(hud):
+		hud.set_modal_blocked(blocked)
 	if blocked:
 		touch.release_all()
 	touch.visible = not blocked and (OS.has_feature("mobile") or touch.test_mode)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if is_instance_valid(social) and social.ui.visible:
+		if not event.is_echo() and (event.is_action_pressed("close_dialogue") or event.is_action_pressed("social")):
+			social.ui.close_panel()
+		get_viewport().set_input_as_handled()
+		return
+	if event.is_action_pressed("social") and not event.is_echo():
+		social.toggle_relations()
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("journal") and not event.is_echo():
 		if not is_instance_valid(academic.ui) or not academic.ui.visible:
 			story.toggle_journal()
@@ -212,6 +231,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			story.marisol()
 			student.controls_enabled = false
 			ui.open_dialogue(guide.DISPLAY_NAME, guide.DIALOGUE)
+		elif social.interact():
+			pass
 		elif academic.interact():
 			pass
 		elif story.interact():

@@ -1,4 +1,32 @@
-# CHAPINGO: VIDA UNIVERSITARIA — V0.5.3
+# CHAPINGO: VIDA UNIVERSITARIA — V0.6
+
+V0.6 incorpora una primera vida social modular: tres compañeros, conversaciones con decisiones, amistades y dos misiones opcionales. Conserva el campus, sus cinco estudiantes ambientales y el sistema académico de V0.5.3.
+
+## Vida social V0.6
+
+| Compañero | Ubicación habitual | Personalidad e intereses |
+| --- | --- | --- |
+| Inés | Patio de Honor | Curiosa y directa; fotografía plantas y aprende las rutas del campus. |
+| Beto | Junto al Comedor Central | Sociable y bromista; voleibol, convivencia y presupuesto estudiantil. |
+| Luz | Frente a Biblioteca Central | Reservada, observadora y de humor seco; lectura, suelos y ajedrez. |
+
+Acércate a un compañero y pulsa **E** o **Acción**. Elige un tema y una respuesta con mouse, toque o teclado (**Tab**, flechas y **Enter/Espacio**). Las respuestas tienen reacciones propias; pueden aumentar o reducir la afinidad independiente de cada persona, limitada a 0–100. Los saludos cambian con el nivel: **Conocido (0–29)**, **Compañero (30–59)** y **Amigo (60–100)**. Cada tema registra una decisión importante y modifica la afinidad una sola vez por partida. Al repetirlo se recuerda la respuesta anterior sin volver a sumar puntos.
+
+**Social (R)**, situado debajo de la barra superior sin ampliar su fila, abre las relaciones, ubicaciones, intereses, afinidad y nivel. Las personas aún no saludadas aparecen como **Por conocer**. **Esc**, **R** o el botón fijo **Cerrar** terminan la conversación; **Volver a los temas** permite seguir charlando. La conversación pausa el reloj y el movimiento. Los botones del HUD dejan de aceptar foco mientras hay un modal; al cerrar recuperan su funcionamiento. Se conserva `MOUSE_FILTER_IGNORE` en el Control raíz del HUD.
+
+Las misiones secundarias se descubren al saludar y aparecen en el diario existente:
+
+- **Un campus con nombres:** conoce a dos compañeros distintos. Repetir saludos a la misma persona no completa el objetivo.
+- **Un lugar en la mesa:** alcanza 30 de afinidad con Beto y elige compartir un rato junto al comedor. Posponer la invitación permite retomarla después. Repetir sobremesas no concede afinidad adicional.
+
+Las misiones sociales son opcionales y no bloquean las clases, misiones anteriores ni la exploración. Los compañeros ocupan puntos transitables existentes, sin añadir colisiones. Su ubicación es fija en esta primera versión; no siguen al protagonista ni aparecen en las viviendas.
+
+El guardado añade un campo `social` con afinidades, decisiones y sobremesas, conservando `version: 1`, el perfil, las misiones y los datos académicos. Las partidas V0.2–V0.5.3 sin ese campo reciben relaciones vacías al cargar; la carga no reescribe el archivo. El progreso se guarda al conocer a alguien y al decidir, además de los controles de guardado existentes.
+
+Para ampliar el sistema, añade personajes y temas con identificadores estables en `scripts/social_catalog.gd`. `social_state.gd` valida y serializa el estado; `social_manager.gd` conecta interacciones y eventos de misiones; `social_student.gd` reutiliza el dibujo de estudiantes; `social_ui.gd` presenta texto y opciones en un área vertical con cierre y navegación fijos.
+
+## Mejoras académicas conservadas
+
 
 V0.5.3 separa el panel académico en navegación y título, preguntas con desplazamiento vertical y un pie fijo con retroalimentación y **Entregar actividad**. El botón permanece accesible al recorrer las preguntas, con mouse o teclado (Tab/Enter). La validación enumera las preguntas pendientes y enfoca la primera; la entrega conserva calificación, historial y guardado, sin duplicar actividades. Las listas mantienen su ancho y el foco de teclado desplaza la pregunta a la vista. Se conserva la corrección `MOUSE_FILTER_IGNORE` del HUD y el formato de partidas existentes.
 
@@ -66,11 +94,12 @@ También se conservan:
 - **Esc:** cerrar diálogo o panel modal.
 - **J:** abrir/cerrar diario de misiones.
 - **H:** abrir/cerrar panel académico.
+- **R / Social:** consultar relaciones o cerrar una conversación social.
 - **Ctrl + Shift + M:** simular controles táctiles en escritorio.
 
 ## Guardado y compatibilidad
 
-El archivo `user://partida.json` conserva perfil, vivienda, ubicación, posición, misiones, día, hora, asistencias, actividades y calificaciones. El formato sigue aceptando partidas de V0.2, V0.2.1, V0.3 y V0.4: si faltan campos académicos, se inicializan sin borrar los sistemas anteriores.
+El archivo `user://partida.json` conserva perfil, vivienda, ubicación, posición, misiones, día, hora, asistencias, actividades, calificaciones y relaciones sociales. El formato sigue aceptando partidas de V0.2, V0.2.1, V0.3 y V0.4: si faltan campos académicos, se inicializan sin borrar los sistemas anteriores.
 
 Al cargar una posición antigua del campus se comprueba que sea transitable. Si quedó dentro de un edificio, árbol, banca, luminaria o límite tras la ampliación V0.4, el estudiante reaparece en un punto central seguro sin perder progreso.
 
@@ -85,7 +114,8 @@ En Windows, el guardado normal corresponde a `%APPDATA%/Godot/app_userdata/CHAPI
 - `scripts/academic_manager.gd`: integración del sistema académico con el mundo.
 - `scripts/academic_ui.gd`: resumen, horario, actividad e historial.
 - `scripts/game_hud.gd`: barra superior y ayuda accesible.
-- `scripts/session.gd`: perfil, misiones, datos académicos y compatibilidad de guardado.
+- `scripts/session.gd`: perfil, misiones, datos académicos, relaciones y compatibilidad de guardado.
+- `scripts/social_catalog.gd`, `social_state.gd`, `social_manager.gd`, `social_student.gd`, `social_ui.gd`: datos, estado, integración, compañeros e interfaz social.
 - `maps/campus.gd`: campus V0.4 y validación de posiciones transitables.
 - `scripts/campus_story.gd`: Marisol, comedor, aulas y diario de misiones.
 
@@ -108,6 +138,7 @@ godot --headless --path . --script tests/v05.gd
 godot --headless --path . --script tests/v051.gd
 godot --headless --path . --script tests/v052.gd
 godot --headless --path . --script tests/v053.gd
+godot --headless --path . --script tests/v06.gd
 godot --headless --path . --quit-after 120
 ```
 
@@ -116,6 +147,11 @@ godot --headless --path . --quit-after 120
 `tests/v052.gd` inicia una partida, fija lunes día 15 a las 09:05, entra a AULAS con E y usa eventos GUI de mouse para abrir las tres listas, seleccionar respuestas y entregar Botánica. Comprueba nota, historial, persistencia y clics de los botones del HUD y cierre de Ayuda. Es una prueba automatizada headless de enrutamiento GUI, no una revisión visual manual ni una prueba con mouse físico.
 
 
-`tests/v053.gd` comprueba 1152×720, 960×540, 640×360 y 844×390 con eventos GUI: selección de las tres respuestas, rueda, arrastre de barra vertical, gesto pan sintético, acceso completo a la última respuesta, pie sin superposición, botón fijo, validación de preguntas pendientes, entrega con mouse y Tab/Enter, resultado, historial, prevención de duplicados y persistencia tras cargar. Incluye las tres materias con mensajes de asistencia en formato compacto. Las ocho suites anteriores también pasan con Godot 4.6.3; las expectativas de versión en `v05.gd` se actualizan a V0.5.3.
+`tests/v053.gd` comprueba 1152×720, 960×540, 640×360 y 844×390 con eventos GUI: selección de las tres respuestas, rueda, arrastre de barra vertical, gesto pan sintético, acceso completo a la última respuesta, pie sin superposición, botón fijo, validación de preguntas pendientes, entrega con mouse y Tab/Enter, resultado, historial, prevención de duplicados y persistencia tras cargar. Incluye las tres materias con mensajes de asistencia en formato compacto. Las ocho suites anteriores también pasan con Godot 4.6.3; las expectativas de `v05.gd` comprueban ahora V0.6.
 
 Se revisaron visualmente capturas renderizadas por Godot en Linux en los cuatro tamaños. El scroll táctil conserva el comportamiento nativo de `ScrollContainer`, con propagación de eventos desde las listas y etiquetas que ignoran el mouse. El gesto pan automatizado no equivale a arrastrar un dedo en un teléfono: quedan pendientes la prueba física en móvil y la confirmación manual en Windows.
+
+
+`tests/v06.gd` comprueba los tres compañeros y sus puntos transitables, apariencia, interacción E, ramas de conversación, selección por teclado y mouse, afinidades independientes, disminuciones, límites, umbrales, saludos según nivel, antirrepetición antes y después de cargar, misiones y diario, persistencia conjunta con una nota académica y carga sin campo social. También verifica Acción táctil simulada, liberación del joystick, cierre GUI y restauración de controles, protección de modales y distribución en 1152×720, 960×540, 640×360 y 844×390, incluida la última opción de conversación y los botones fijos.
+
+V0.6: las diez suites pasan con Godot 4.6.3. En modo headless se comprueba el cierre con mouse porque ese controlador no emula el toque del sistema a mouse. La misma suite también pasa con renderizado Linux y cierre mediante `InputEventScreenTouch` sintético. Se revisaron capturas del campus, conversaciones, resultados y relaciones en los cuatro tamaños. No se realizaron pruebas físicas en Windows, Android ni iOS: quedan pendientes la respuesta del teclado/mouse físicos, el toque y arrastre con un dedo real y las áreas seguras de dispositivos reales.

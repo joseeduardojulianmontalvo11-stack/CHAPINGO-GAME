@@ -9,12 +9,14 @@ var saved_position := Vector2(820, 600)
 var save_path := SAVE_PATH
 var quests = preload("res://scripts/quests.gd").new()
 var clock = preload("res://scripts/academic_clock.gd").new()
+var social = preload("res://scripts/social_state.gd").new()
 var academics = preload("res://scripts/academics.gd").new()
 
 func new_game(data: Dictionary) -> void:
 	quests.reset()
 	clock.reset()
 	academics.reset()
+	social.reset()
 	profile = data.duplicate(true)
 	location = profile["housing"]
 	saved_position = Vector2(560, 450)
@@ -29,6 +31,7 @@ func save_game() -> bool:
 		"location": location,
 		"position": [saved_position.x, saved_position.y],
 		"quests": quests.progress,
+		"social": social.snapshot(),
 		"academic": {"clock": clock.snapshot(), "records": academics.snapshot()}
 	}))
 	return true
@@ -70,6 +73,7 @@ func load_game() -> bool:
 	else:
 		clock.reset()
 		academics.reset()
+	social.restore(data.get("social", {}) if data.get("social", {}) is Dictionary else {})
 	return true
 
 func sanitize_position(place: String, point: Vector2) -> Vector2:

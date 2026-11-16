@@ -12,6 +12,7 @@ var help_title: Label
 var help_scroll: ScrollContainer
 var help_text: Label
 var help_close: Button
+var social_button: Button
 
 func _ready() -> void:
 	# El lienzo transparente no debe tapar los paneles hermanos del CanvasLayer.
@@ -49,6 +50,9 @@ func _ready() -> void:
 	var help := _button("Ayuda", 80)
 	help.pressed.connect(toggle_help)
 	row.add_child(help)
+	social_button = _button("Social (R)", 140)
+	social_button.pressed.connect(world.social.toggle_relations)
+	add_child(social_button)
 	_build_help()
 	get_viewport().size_changed.connect(reflow)
 	reflow()
@@ -96,14 +100,22 @@ func _build_help() -> void:
 	help_text.vertical_alignment = VERTICAL_ALIGNMENT_TOP
 	help_text.text = AppInfo.TITLE + " · " + AppInfo.VERSION + "\n\n" + \
 		"MOVIMIENTO\nWASD o flechas: caminar. E / Acción: interactuar. Esc / Cerrar: cerrar ventanas.\n\n" + \
-		"ORGANIZACIÓN\nJ: diario de misiones. H: panel académico. Guardar conserva ubicación, reloj, asistencias y calificaciones.\n\n" + \
+		"ORGANIZACIÓN\nJ: diario de misiones. H: panel académico. R: relaciones sociales. Guardar conserva ubicación, reloj, asistencias y calificaciones.\n\n" + \
 		"TACTO\nEl joystick mueve al estudiante; Acción interactúa y Cerrar sale de diálogos. En escritorio, Ctrl + Shift + M simula estos controles.\n\n" + \
-		"VIDA ACADÉMICA\nEn la entrada de AULAS sabrás si hay una clase disponible y cuál sigue. Durante una clase, pulsa E o Acción, elige una respuesta en cada pregunta y entrega la actividad para ver tu calificación. Dormir en la vivienda avanza al día siguiente."
+		"VIDA ACADÉMICA\nEn la entrada de AULAS sabrás si hay una clase disponible y cuál sigue. Durante una clase, pulsa E o Acción, elige una respuesta en cada pregunta y entrega la actividad para ver tu calificación. Dormir en la vivienda avanza al día siguiente.\n\nVIDA SOCIAL\nE / Acción: conversar con Inés, Beto o Luz. Elige respuestas con mouse, toque o Tab/Enter. Cada tema cambia afinidad una sola vez. Social (R) muestra intereses y niveles; Esc o el botón Cerrar termina la conversación."
 	help_scroll.add_child(help_text)
 	help_panel.hide()
 
 func _process(_delta: float) -> void:
 	clock_label.text = Session.clock.label()
+
+func set_modal_blocked(blocked: bool) -> void:
+	social_button.visible = not blocked
+	# El foco de teclado permanece en el modal activo.
+	for control in top_panel.get_child(0).get_children():
+		if control is Button:
+			control.disabled = blocked
+			control.focus_mode = Control.FOCUS_NONE if blocked else Control.FOCUS_ALL
 
 func _save() -> void:
 	save_button.text = "Guardado" if world.save_current() else "Error"
@@ -122,6 +134,7 @@ func reflow() -> void:
 	var safe := Layout.rect(get_viewport())
 	position = safe.position
 	size = safe.size
+	social_button.position = Vector2(safe.size.x - 140, 60)
 	top_panel.position = Vector2.ZERO
 	top_panel.size = Vector2(safe.size.x, 52)
 	help_panel.position = Vector2(0, 60)

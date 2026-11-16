@@ -13,7 +13,7 @@ func _ready() -> void:
 	Session.quests.changed.connect(func(): world.save_current())
 
 func toggle_journal() -> void:
-	if world.ui.is_open:
+	if not journal.visible and world.has_blocking_modal():
 		return
 	journal.visible = not journal.visible
 	world.sync_modal_state()
@@ -52,7 +52,7 @@ func say(title: String, line: String) -> void:
 
 func _process(_delta: float) -> void:
 	visible = world.current_location == "campus"
-	if not visible or world.ui.is_open or journal.visible:
+	if not visible or world.has_blocking_modal():
 		return
 	if CLASSROOM_ENTRY.has_point(world.student.position):
 		if not Session.quests.event("entrada_aulas").is_empty():
