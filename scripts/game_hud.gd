@@ -14,7 +14,9 @@ var help_text: Label
 var help_close: Button
 
 func _ready() -> void:
-	mouse_filter = Control.MOUSE_FILTER_PASS
+	# El lienzo transparente no debe tapar los paneles hermanos del CanvasLayer.
+	# Los botones y paneles hijos conservan sus propios filtros interactivos.
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	top_panel = PanelContainer.new()
 	add_child(top_panel)
 	var row := HBoxContainer.new()

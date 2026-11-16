@@ -1,4 +1,6 @@
-# CHAPINGO: VIDA UNIVERSITARIA — V0.5.1
+# CHAPINGO: VIDA UNIVERSITARIA — V0.5.2
+
+V0.5.2 corrige el bloqueo de clics en la interfaz académica: el Control raíz transparente del HUD ignora el mouse y sus hijos interactivos conservan sus filtros. Las tres listas de respuestas, la entrega y los botones del HUD se verifican enviando eventos de mouse al viewport.
 
 V0.5.1 pule la interfaz y el flujo académico de V0.5 sin modificar los sistemas ni las coordenadas principales del campus V0.4.
 
@@ -102,7 +104,10 @@ godot --headless --path . --script tests/mobile.gd
 godot --headless --path . --script tests/v04.gd
 godot --headless --path . --script tests/v05.gd
 godot --headless --path . --script tests/v051.gd
+godot --headless --path . --script tests/v052.gd
 godot --headless --path . --quit-after 120
 ```
 
 `tests/v05.gd` verifica la base académica. `tests/v051.gd` añade regresiones para apertura y ancho legible de Ayuda, área segura, separación de letreros, mensajes dentro y fuera de horario, selección obligatoria de tres respuestas, entrega, calificación, historial y persistencia. Las suites anteriores continúan comprobando movimiento, colisiones, cámara, viviendas, misiones, diario, guardado y simulación táctil.
+
+`tests/v052.gd` inicia una partida, fija lunes día 15 a las 09:05, entra a AULAS con E y usa eventos GUI de mouse para abrir las tres listas, seleccionar respuestas y entregar Botánica. Comprueba nota, historial, persistencia y clics de los botones del HUD y cierre de Ayuda. Es una prueba automatizada headless de enrutamiento GUI, no una revisión visual manual ni una prueba con mouse físico.
