@@ -8,6 +8,8 @@ var body: VBoxContainer
 var title: Label
 var notice := ""
 var answer_controls: Array[OptionButton] = []
+var activity_feedback: Label
+var submit_button: Button
 
 func _ready() -> void:
 	var margin := MarginContainer.new()
@@ -32,6 +34,8 @@ func _ready() -> void:
 	title.add_theme_font_size_override("font_size", 25)
 	column.add_child(title)
 	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(scroll)
 	body = VBoxContainer.new()
@@ -50,6 +54,8 @@ func _button(label: String) -> Button:
 
 func _clear() -> void:
 	answer_controls.clear()
+	activity_feedback = null
+	submit_button = null
 	for child in body.get_children():
 		body.remove_child(child)
 		child.queue_free()
@@ -84,10 +90,11 @@ func show_overview() -> void:
 		_label(notice, 21)
 	var current: Dictionary = manager.current_session()
 	if current.is_empty():
-		_label("Ahora no hay clase disponible. El campus acepta exploradores sin justificante.")
+		if notice.is_empty():
+			_label("No hay clase en este momento.")
 	else:
 		var subject: Dictionary = Schedule.SUBJECTS[current["subject_id"]]
-		_label("CLASE DISPONIBLE\n%s · %s" % [subject["name"], subject["professor"]], 22)
+		_label("CLASE DISPONIBLE: %s, %s\n%s" % [subject["name"], manager.schedule.format_minute(current["start"]), subject["professor"]], 22)
 	var next: Dictionary = manager.next_session()
 	if not next.is_empty():
 		var definition: Dictionary = Schedule.SUBJECTS[next["subject_id"]]
@@ -130,33 +137,48 @@ func show_activity(subject_id: String, attendance_message: String) -> void:
 	_clear()
 	var subject: Dictionary = Schedule.SUBJECTS[subject_id]
 	title.text = "Actividad · " + subject["name"]
-	_label(attendance_message + " Tres preguntas separan tu calificación de una anécdota.")
+	_label(attendance_message, 21)
+	_label("Responde las 3 preguntas. Elige una opción en cada lista y pulsa Entregar actividad.", 18)
+	var question_number := 0
 	for question in subject["questions"]:
-		_label(question["text"], 19)
+		question_number += 1
+		_label("%d. %s" % [question_number, question["text"]], 19)
 		var choice := OptionButton.new()
+		choice.name = "Respuesta%d" % question_number
 		choice.custom_minimum_size.y = 52
+		choice.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		choice.add_item("Selecciona una respuesta…")
 		for option in question["options"]:
 			choice.add_item(option)
 		body.add_child(choice)
 		answer_controls.append(choice)
-	var submit := _button("Entregar actividad")
-	submit.pressed.connect(func(): _submit(subject_id))
-	body.add_child(submit)
+	activity_feedback = _label("", 18)
+	submit_button = _button("Entregar actividad")
+	submit_button.name = "EntregarActividad"
+	submit_button.pressed.connect(func(): _submit(subject_id))
+	body.add_child(submit_button)
+	if not answer_controls.is_empty():
+		answer_controls[0].grab_focus()
 	show()
 	manager.world.sync_modal_state()
 
 func _submit(subject_id: String) -> void:
 	var answers: Array = []
 	for choice in answer_controls:
-		answers.append(choice.selected)
+		if choice.selected <= 0:
+			activity_feedback.text = "Falta responder una o más preguntas. Selecciona una opción en las 3 listas."
+			choice.grab_focus()
+			return
+		answers.append(choice.selected - 1)
 	var grade := Session.academics.grade_activity(subject_id, answers)
 	if grade < 0:
-		notice = "Esta actividad ya fue evaluada. La agricultura regenera; los puntos infinitos, no."
+		notice = "Esta actividad ya fue evaluada."
 	else:
-		notice = "Calificación: %.1f / 10. %s" % [grade, "La cosecha académica fue buena." if grade >= 6 else "Hay suelo fértil para mejorar."]
+		notice = "Actividad entregada.\nCalificación: %.1f / 10." % grade
 	manager.world.save_current()
 	show_history()
-	_label(notice, 21)
+	var result := _label(notice, 21)
+	body.move_child(result, 0)
 
 func close_panel() -> void:
 	hide()
@@ -166,3 +188,5 @@ func reflow() -> void:
 	var safe := Layout.rect(get_viewport())
 	position = safe.position + Vector2(0, 60)
 	size = Vector2(safe.size.x, safe.size.y - 60)
+	if is_instance_valid(body):
+		body.custom_minimum_size.x = maxf(280.0, safe.size.x - 72.0)

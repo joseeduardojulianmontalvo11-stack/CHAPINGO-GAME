@@ -1,4 +1,6 @@
-# CHAPINGO: VIDA UNIVERSITARIA — V0.5
+# CHAPINGO: VIDA UNIVERSITARIA — V0.5.1
+
+V0.5.1 pule la interfaz y el flujo académico de V0.5 sin modificar los sistemas ni las coordenadas principales del campus V0.4.
 
 Simulador universitario 2D de vista superior inspirado en la Universidad Autónoma Chapingo. El campus es una representación original construida con primitivas de Godot; no utiliza el mapa institucional como fondo ni presenta horarios oficiales de la universidad.
 
@@ -20,7 +22,7 @@ El reloj se pausa durante diálogos, diario, ayuda, panel académico y actividad
 
 Para asistir, consulta **Académico (H)**, dirígete a la entrada existente de AULAS durante una sesión y pulsa **E** o **Acción**. Faltar o llegar tarde sólo se registra: nunca bloquea el campus ni termina la partida.
 
-## Interfaz V0.5
+## Interfaz V0.5.1
 
 La barra superior reúne en una sola fila:
 
@@ -32,7 +34,9 @@ La barra superior reúne en una sola fila:
 - Diario (J).
 - Ayuda.
 
-Las instrucciones permanentes se sustituyeron por un panel **Ayuda** accesible. La versión se define una sola vez en `scripts/app_info.gd` y se reutiliza en menú e interfaz. Los botones principales mantienen al menos 48 unidades de alto y toda la interfaz consulta el área segura.
+Las instrucciones permanentes se sustituyeron por un panel **Ayuda** accesible. En V0.5.1 el panel usa un título y cierre separados, ancho de lectura estable, ajuste por palabras y desplazamiento vertical dentro del área segura. La versión se define una sola vez en `scripts/app_info.gd` y se reutiliza en menú e interfaz. Los botones principales mantienen al menos 48 unidades de alto.
+
+En la entrada de AULAS, el aviso indica si no hay clase y muestra la próxima materia y hora. Si hay clase, anuncia materia y hora antes de asistir. La actividad exige seleccionar una respuesta para cada una de sus tres preguntas, avisa si falta alguna y, al entregarse, muestra la calificación junto con el historial académico.
 
 El joystick y los botones **Acción** y **Cerrar** se conservan. En escritorio, **Ctrl + Shift + M** muestra u oculta la simulación táctil.
 
@@ -97,9 +101,8 @@ godot --headless --path . --script tests/quests.gd
 godot --headless --path . --script tests/mobile.gd
 godot --headless --path . --script tests/v04.gd
 godot --headless --path . --script tests/v05.gd
+godot --headless --path . --script tests/v051.gd
 godot --headless --path . --quit-after 120
 ```
 
-`tests/v05.gd` verifica versión centralizada, reloj, cambio de día, pausas modales, horario, tres materias, asistencia puntual/tarde/falta, duplicados, actividad, calificación, descanso, persistencia, compatibilidad anterior, saneamiento de posiciones, HUD, área segura, campus y controles táctiles. Las suites anteriores continúan comprobando movimiento, colisiones, cámara, viviendas, misiones, diario, guardado y simulación táctil.
-
-En este entorno no fue posible efectuar revisión visual V0.5: el escritorio compartido no pudo inicializarse y no había servidor gráfico virtual disponible. Las validaciones reportadas son headless. Quedan pendientes una revisión visual manual V0.5 y pruebas físicas de multitáctil, áreas seguras, rendimiento y suspensión en Windows, Android e iOS.
+`tests/v05.gd` verifica la base académica. `tests/v051.gd` añade regresiones para apertura y ancho legible de Ayuda, área segura, separación de letreros, mensajes dentro y fuera de horario, selección obligatoria de tres respuestas, entrega, calificación, historial y persistencia. Las suites anteriores continúan comprobando movimiento, colisiones, cámara, viviendas, misiones, diario, guardado y simulación táctil.

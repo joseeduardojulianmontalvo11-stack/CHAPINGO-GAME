@@ -8,6 +8,10 @@ var top_panel: PanelContainer
 var clock_label: Label
 var save_button: Button
 var help_panel: PanelContainer
+var help_title: Label
+var help_scroll: ScrollContainer
+var help_text: Label
+var help_close: Button
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_PASS
@@ -55,29 +59,45 @@ func _button(label: String, width: float) -> Button:
 
 func _build_help() -> void:
 	help_panel = PanelContainer.new()
+	help_panel.name = "PanelAyuda"
 	add_child(help_panel)
 	var margin := MarginContainer.new()
 	for side in ["left", "top", "right", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, 20)
+		margin.add_theme_constant_override("margin_" + side, 18)
 	help_panel.add_child(margin)
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 12)
 	margin.add_child(column)
-	var close := _button("Ayuda · Cerrar", 180)
-	close.pressed.connect(toggle_help)
-	column.add_child(close)
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	column.add_child(scroll)
-	var text := Label.new()
-	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	text.add_theme_font_size_override("font_size", 20)
-	text.text = AppInfo.TITLE + " · " + AppInfo.VERSION + "\n\n" + \
+	var header := HBoxContainer.new()
+	header.add_theme_constant_override("separation", 12)
+	column.add_child(header)
+	help_title = Label.new()
+	help_title.text = "Ayuda y controles"
+	help_title.add_theme_font_size_override("font_size", 26)
+	help_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	help_title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	header.add_child(help_title)
+	help_close = _button("Cerrar (Esc)", 150)
+	help_close.pressed.connect(toggle_help)
+	header.add_child(help_close)
+	help_scroll = ScrollContainer.new()
+	help_scroll.name = "ContenidoDesplazable"
+	help_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	help_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	help_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	column.add_child(help_scroll)
+	help_text = Label.new()
+	help_text.name = "TextoAyuda"
+	help_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	help_text.add_theme_font_size_override("font_size", 20)
+	help_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	help_text.vertical_alignment = VERTICAL_ALIGNMENT_TOP
+	help_text.text = AppInfo.TITLE + " · " + AppInfo.VERSION + "\n\n" + \
 		"MOVIMIENTO\nWASD o flechas: caminar. E / Acción: interactuar. Esc / Cerrar: cerrar ventanas.\n\n" + \
 		"ORGANIZACIÓN\nJ: diario de misiones. H: panel académico. Guardar conserva ubicación, reloj, asistencias y calificaciones.\n\n" + \
 		"TACTO\nEl joystick mueve al estudiante; Acción interactúa y Cerrar sale de diálogos. En escritorio, Ctrl + Shift + M simula estos controles.\n\n" + \
-		"VIDA ACADÉMICA\nConsulta el horario, llega a AULAS durante una clase y realiza la actividad. Dormir en la vivienda avanza al día siguiente. Explorar sigue siendo opcional y saludable."
-	scroll.add_child(text)
+		"VIDA ACADÉMICA\nEn la entrada de AULAS sabrás si hay una clase disponible y cuál sigue. Durante una clase, pulsa E o Acción, elige una respuesta en cada pregunta y entrega la actividad para ver tu calificación. Dormir en la vivienda avanza al día siguiente."
+	help_scroll.add_child(help_text)
 	help_panel.hide()
 
 func _process(_delta: float) -> void:
@@ -104,3 +124,7 @@ func reflow() -> void:
 	top_panel.size = Vector2(safe.size.x, 52)
 	help_panel.position = Vector2(0, 60)
 	help_panel.size = Vector2(safe.size.x, safe.size.y - 60)
+	# Un hijo de ScrollContainer sin ancho minimo puede colapsar y envolver letra
+	# por letra. Se fija al ancho util, dejando el desplazamiento solo en vertical.
+	if is_instance_valid(help_text):
+		help_text.custom_minimum_size.x = maxf(280.0, safe.size.x - 72.0)

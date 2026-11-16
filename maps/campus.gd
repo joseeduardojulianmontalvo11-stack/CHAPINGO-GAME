@@ -27,6 +27,12 @@ const BENCHES := [
 	Rect2(1450, 730, 95, 24), Rect2(1690, 730, 95, 24), Rect2(1450, 1360, 95, 24), Rect2(1690, 1360, 95, 24)
 ]
 const LAMPS := [Vector2(1110, 735), Vector2(2070, 735), Vector2(1110, 1370), Vector2(2070, 1370), Vector2(1400, 1390), Vector2(1840, 1390)]
+const CAMPUS_SIGNS := [
+	{"p": Vector2(1000, 650), "t": "Centro / Rectoria"},
+	{"p": Vector2(2110, 650), "t": "Biblioteca / Aulas"},
+	# Alejado del rotulo y portal de vivienda, sin modificar edificios ni accesos.
+	{"p": Vector2(790, 1450), "t": "Dormitorios / La Meche"}
+]
 const WALKABLE_CHECKPOINTS := [
 	Vector2(1420, 1180), Vector2(1050, 1180), Vector2(900, 1180), Vector2(565, 1280),
 	Vector2(1580, 650), Vector2(1580, 520), Vector2(2090, 660), Vector2(2440, 670),
@@ -167,11 +173,7 @@ func _draw_props() -> void:
 		draw_line(point, point - Vector2(0, 58), Color("3d4b47"), 6)
 		draw_circle(point - Vector2(0, 62), 12, Color("f5df95"))
 		draw_arc(point - Vector2(0, 62), 15, PI, TAU, 12, Color("394b47"), 5)
-	for sign in [
-		{"p": Vector2(1000, 650), "t": "Centro / Rectoria"},
-		{"p": Vector2(2110, 650), "t": "Biblioteca / Aulas"},
-		{"p": Vector2(1040, 1450), "t": "Dormitorios / La Meche"}
-	]:
+	for sign in CAMPUS_SIGNS:
 		var p: Vector2 = sign["p"]
 		draw_line(p, p + Vector2(0, 62), Color("5b4938"), 7)
 		draw_rect(Rect2(p - Vector2(95, 30), Vector2(190, 42)), Color("315b43"))

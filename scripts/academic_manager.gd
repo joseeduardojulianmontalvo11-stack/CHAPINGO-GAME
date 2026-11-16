@@ -34,23 +34,30 @@ func next_session() -> Dictionary:
 func prompt_text() -> String:
 	var session := current_session()
 	if session.is_empty():
-		return "[E / Acción] Consultar horario en AULAS"
-	return "[E / Acción] Asistir a " + Schedule.SUBJECTS[session["subject_id"]]["name"]
+		return "[E / Acción] No hay clase ahora · Consultar próxima"
+	var subject: Dictionary = Schedule.SUBJECTS[session["subject_id"]]
+	return "Clase disponible: %s, %s · [E / Acción] Asistir" % [subject["name"], schedule.format_minute(session["start"])]
 
 func interact() -> bool:
 	if not near_classroom():
 		return false
 	var session := current_session()
 	if session.is_empty():
-		ui.open_with_notice("No hay clase en esta franja. La puerta no toma asistencia por lástima.")
+		var message := "No hay clase en este momento."
+		var next := next_session()
+		if not next.is_empty():
+			var next_subject: Dictionary = Schedule.SUBJECTS[next["subject_id"]]
+			message += "\nPróxima clase: %s, %s." % [next_subject["name"], schedule.format_minute(next["start"])]
+		ui.open_with_notice(message)
 		return true
 	var subject_id: String = session["subject_id"]
+	var subject: Dictionary = Schedule.SUBJECTS[subject_id]
 	var status := Session.academics.attend(subject_id, Session.clock.day, Session.clock.minute_of_day)
 	if status == "duplicada":
-		ui.open_with_notice("Esta sesión ya tiene tu asistencia. Admirable entusiasmo, pero una firma basta.")
+		ui.open_with_notice("Clase disponible: %s, %s.\nEsta sesión ya tiene tu asistencia." % [subject["name"], schedule.format_minute(session["start"])])
 	elif status in ["a_tiempo", "tarde"]:
 		world.save_current()
-		var message := "Llegaste a tiempo." if status == "a_tiempo" else "Llegaste tarde, pero llegaste: victoria parcial."
+		var message := "Clase disponible: %s, %s.\n%s" % [subject["name"], schedule.format_minute(session["start"]), "Llegaste a tiempo." if status == "a_tiempo" else "Llegaste tarde."]
 		if Session.academics.completed_activities.has(subject_id):
 			ui.open_with_notice(message + " La actividad de esta materia ya fue evaluada.")
 		else:
