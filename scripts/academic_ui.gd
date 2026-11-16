@@ -4,6 +4,8 @@ extends PanelContainer
 const Layout = preload("res://scripts/safe_layout.gd")
 const Schedule = preload("res://scripts/academic_schedule.gd")
 var manager: Node
+var scroll: ScrollContainer
+var footer: HBoxContainer
 var body: VBoxContainer
 var title: Label
 var notice := ""
@@ -14,10 +16,10 @@ var submit_button: Button
 func _ready() -> void:
 	var margin := MarginContainer.new()
 	for side in ["left", "top", "right", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, 18)
+		margin.add_theme_constant_override("margin_" + side, 10)
 	add_child(margin)
 	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 10)
+	column.add_theme_constant_override("separation", 6)
 	margin.add_child(column)
 	var nav := HBoxContainer.new()
 	nav.add_theme_constant_override("separation", 8)
@@ -31,17 +33,24 @@ func _ready() -> void:
 	close.pressed.connect(close_panel)
 	nav.add_child(close)
 	title = Label.new()
-	title.add_theme_font_size_override("font_size", 25)
+	title.add_theme_font_size_override("font_size", 22)
 	column.add_child(title)
-	var scroll := ScrollContainer.new()
+	scroll = ScrollContainer.new()
+	scroll.mouse_filter = Control.MOUSE_FILTER_STOP
+	scroll.follow_focus = true
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(scroll)
 	body = VBoxContainer.new()
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body.mouse_filter = Control.MOUSE_FILTER_PASS
 	body.add_theme_constant_override("separation", 12)
 	scroll.add_child(body)
+	footer = HBoxContainer.new()
+	footer.add_theme_constant_override("separation", 10)
+	column.add_child(footer)
+	footer.hide()
 	get_viewport().size_changed.connect(reflow)
 	reflow()
 	hide()
@@ -49,19 +58,23 @@ func _ready() -> void:
 func _button(label: String) -> Button:
 	var control := Button.new()
 	control.text = label
-	control.custom_minimum_size.y = 52
+	control.custom_minimum_size.y = 48
 	return control
 
 func _clear() -> void:
 	answer_controls.clear()
 	activity_feedback = null
 	submit_button = null
-	for child in body.get_children():
-		body.remove_child(child)
-		child.queue_free()
+	footer.hide()
+	scroll.scroll_vertical = 0
+	for container in [body, footer]:
+		for child in container.get_children():
+			container.remove_child(child)
+			child.queue_free()
 
 func _label(value: String, font_size := 20) -> Label:
 	var label := Label.new()
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.text = value
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.add_theme_font_size_override("font_size", font_size)
@@ -137,13 +150,18 @@ func show_activity(subject_id: String, attendance_message: String) -> void:
 	_clear()
 	var subject: Dictionary = Schedule.SUBJECTS[subject_id]
 	title.text = "Actividad · " + subject["name"]
-	_label(attendance_message, 21)
-	_label("Responde las 3 preguntas. Elige una opción en cada lista y pulsa Entregar actividad.", 18)
+	activity_feedback = _label(attendance_message.replace("\n", " "), 18)
+	body.remove_child(activity_feedback)
+	activity_feedback.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	footer.add_child(activity_feedback)
 	var question_number := 0
 	for question in subject["questions"]:
 		question_number += 1
 		_label("%d. %s" % [question_number, question["text"]], 19)
 		var choice := OptionButton.new()
+		choice.mouse_filter = Control.MOUSE_FILTER_PASS
+		choice.fit_to_longest_item = false
+		choice.clip_text = true
 		choice.name = "Respuesta%d" % question_number
 		choice.custom_minimum_size.y = 52
 		choice.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -152,24 +170,36 @@ func show_activity(subject_id: String, attendance_message: String) -> void:
 			choice.add_item(option)
 		body.add_child(choice)
 		answer_controls.append(choice)
-	activity_feedback = _label("", 18)
 	submit_button = _button("Entregar actividad")
 	submit_button.name = "EntregarActividad"
+	submit_button.size_flags_vertical = Control.SIZE_SHRINK_END
 	submit_button.pressed.connect(func(): _submit(subject_id))
-	body.add_child(submit_button)
+	footer.add_child(submit_button)
+	footer.show()
 	if not answer_controls.is_empty():
 		answer_controls[0].grab_focus()
 	show()
 	manager.world.sync_modal_state()
 
 func _submit(subject_id: String) -> void:
+	if not is_instance_valid(submit_button) or submit_button.disabled:
+		return
 	var answers: Array = []
-	for choice in answer_controls:
+	var missing := PackedStringArray()
+	var first_missing: OptionButton
+	for i in answer_controls.size():
+		var choice := answer_controls[i]
 		if choice.selected <= 0:
-			activity_feedback.text = "Falta responder una o más preguntas. Selecciona una opción en las 3 listas."
-			choice.grab_focus()
-			return
+			missing.append(str(i + 1))
+			if first_missing == null:
+				first_missing = choice
 		answers.append(choice.selected - 1)
+	if not missing.is_empty():
+		activity_feedback.text = "Falta responder: preguntas %s." % ", ".join(missing)
+		first_missing.grab_focus()
+		_reveal_answer.call_deferred(first_missing)
+		return
+	submit_button.disabled = true
 	var grade := Session.academics.grade_activity(subject_id, answers)
 	if grade < 0:
 		notice = "Esta actividad ya fue evaluada."
@@ -180,6 +210,10 @@ func _submit(subject_id: String) -> void:
 	var result := _label(notice, 21)
 	body.move_child(result, 0)
 
+func _reveal_answer(choice: OptionButton) -> void:
+	if is_instance_valid(choice) and scroll.is_ancestor_of(choice):
+		scroll.ensure_control_visible(choice)
+
 func close_panel() -> void:
 	hide()
 	manager.world.sync_modal_state()
@@ -189,4 +223,5 @@ func reflow() -> void:
 	position = safe.position + Vector2(0, 60)
 	size = Vector2(safe.size.x, safe.size.y - 60)
 	if is_instance_valid(body):
-		body.custom_minimum_size.x = maxf(280.0, safe.size.x - 72.0)
+		# El ancho lo asigna el ScrollContainer, descontando su barra vertical.
+		body.custom_minimum_size.x = 0

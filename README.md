@@ -1,4 +1,6 @@
-# CHAPINGO: VIDA UNIVERSITARIA — V0.5.2
+# CHAPINGO: VIDA UNIVERSITARIA — V0.5.3
+
+V0.5.3 separa el panel académico en navegación y título, preguntas con desplazamiento vertical y un pie fijo con retroalimentación y **Entregar actividad**. El botón permanece accesible al recorrer las preguntas, con mouse o teclado (Tab/Enter). La validación enumera las preguntas pendientes y enfoca la primera; la entrega conserva calificación, historial y guardado, sin duplicar actividades. Las listas mantienen su ancho y el foco de teclado desplaza la pregunta a la vista. Se conserva la corrección `MOUSE_FILTER_IGNORE` del HUD y el formato de partidas existentes.
 
 V0.5.2 corrige el bloqueo de clics en la interfaz académica: el Control raíz transparente del HUD ignora el mouse y sus hijos interactivos conservan sus filtros. Las tres listas de respuestas, la entrega y los botones del HUD se verifican enviando eventos de mouse al viewport.
 
@@ -105,9 +107,15 @@ godot --headless --path . --script tests/v04.gd
 godot --headless --path . --script tests/v05.gd
 godot --headless --path . --script tests/v051.gd
 godot --headless --path . --script tests/v052.gd
+godot --headless --path . --script tests/v053.gd
 godot --headless --path . --quit-after 120
 ```
 
 `tests/v05.gd` verifica la base académica. `tests/v051.gd` añade regresiones para apertura y ancho legible de Ayuda, área segura, separación de letreros, mensajes dentro y fuera de horario, selección obligatoria de tres respuestas, entrega, calificación, historial y persistencia. Las suites anteriores continúan comprobando movimiento, colisiones, cámara, viviendas, misiones, diario, guardado y simulación táctil.
 
 `tests/v052.gd` inicia una partida, fija lunes día 15 a las 09:05, entra a AULAS con E y usa eventos GUI de mouse para abrir las tres listas, seleccionar respuestas y entregar Botánica. Comprueba nota, historial, persistencia y clics de los botones del HUD y cierre de Ayuda. Es una prueba automatizada headless de enrutamiento GUI, no una revisión visual manual ni una prueba con mouse físico.
+
+
+`tests/v053.gd` comprueba 1152×720, 960×540, 640×360 y 844×390 con eventos GUI: selección de las tres respuestas, rueda, arrastre de barra vertical, gesto pan sintético, acceso completo a la última respuesta, pie sin superposición, botón fijo, validación de preguntas pendientes, entrega con mouse y Tab/Enter, resultado, historial, prevención de duplicados y persistencia tras cargar. Incluye las tres materias con mensajes de asistencia en formato compacto. Las ocho suites anteriores también pasan con Godot 4.6.3; las expectativas de versión en `v05.gd` se actualizan a V0.5.3.
+
+Se revisaron visualmente capturas renderizadas por Godot en Linux en los cuatro tamaños. El scroll táctil conserva el comportamiento nativo de `ScrollContainer`, con propagación de eventos desde las listas y etiquetas que ignoran el mouse. El gesto pan automatizado no equivale a arrastrar un dedo en un teléfono: quedan pendientes la prueba física en móvil y la confirmación manual en Windows.
